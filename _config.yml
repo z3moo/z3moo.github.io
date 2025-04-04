@@ -27,7 +27,8 @@ social:
   name: Danh 'rec0n' Quan
   email: danhquan2005@gmail.com
   links:
-    - https://twitter.com/username
+    # Replace 'username' with your actual Twitter/X username or remove if not needed
+    - https://twitter.com/YourActualTwitterUsername
     - https://github.com/z3moo
     - https://www.facebook.com/dnhqn.2945/
     - https://www.linkedin.com/in/danh-quan-nguyen-747a57301/
