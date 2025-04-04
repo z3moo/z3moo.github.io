@@ -10,3 +10,4 @@ Our client is a pessimist, she is worried that if she does not pay the ransom in
 
 Author: bquanman
 ## Thought process
+
