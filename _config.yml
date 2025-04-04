@@ -100,8 +100,9 @@ comments:
   disqus:
     shortname: # fill with the Disqus shortname. › https://help.disqus.com/en/articles/1717111-what-s-a-shortname
   # utterances settings › https://utteranc.es/
-  utterances: repo="z3moo/z3moo.github.io"
-    issue-term="pathname"
+  utterances:
+    repo: z3moo/z3moo.github.io
+    issue-term: pathname
   giscus:
     repo: # <gh-username>/<repo>
     repo_id:
