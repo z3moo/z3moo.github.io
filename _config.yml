@@ -7,7 +7,7 @@ timezone: Asia/Bangkok
 # jekyll-seo-tag settings › https://github.com/jekyll/jekyll-seo-tag/blob/master/docs/usage.md
 # ↓ --------------------------
 
-title: rec0n's Blog
+title: Razvedk4
 
 tagline: A website containing my work and projects throughout my learning journey
 
@@ -24,7 +24,7 @@ github:
 social:
   # Change to your full name.
   # It will be displayed as the default author of the posts and the copyright owner in the Footer
-  name: Danh 'rec0n' Quan
+  name: Danh 'razvedk4' Quan
   email: danhquan2005@gmail.com
   links:
     - https://github.com/z3moo

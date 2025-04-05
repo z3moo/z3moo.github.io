@@ -67,13 +67,13 @@ This is fascinating. A program called `update.exe` was executed in the user's `D
 ```
 
 > -e c:\users\ieuser\documents\: Best guess is the program extracts the data to the `Documents` folder of the user
-
+{: .prompt-info }
 > -s 192.168.240.1: Maybe sends the data to a server at 192.168.240.1
-
+{: .prompt-info }
 > -p 443: Uses port 443
-
+{: .prompt-info }
 > -x: Unknown 
-
+{: .prompt-info }
 And PowerShell module was called -> This suggests the executed program could have used PowerShell to run a script.
 
 So now we must find the PowerShell script executed within the memory dump.
@@ -315,3 +315,7 @@ else {
 sleep 1000 ; Write-Host "[i] Done!" -ForegroundColor Green ; Write-Host
 BSJB
 ```
+
+- #Design: Suppresses the PowerShell error and messages to avoid detection, detects if the system is Windows or not. If the system is Windows, changes the terminal to `YagiRansom` and changes the background to black and foreground to white.
+- #Error: Check if all the required parameters are provided, if not prints an error and exits.
+- 
