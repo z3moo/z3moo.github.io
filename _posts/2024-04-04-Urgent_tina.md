@@ -10,11 +10,13 @@ Our client is a pessimist, she is worried that if she does not pay the ransom in
 Author: bquanman
 
 ## Thought process
-
-We are given a `.pcap` and a `.DMP` file.
+### File inspection
+We are given a `.pcapng` and a `.DMP` file.
 
 ![Files Given](../assets/img/UrgentTina/Files%20Given.png)
 _Files given_
+
+#### `.pcapng` file inspection
 
 Opening the `.pcap` file.
 
@@ -27,7 +29,7 @@ Let's follow the TCP stream to check what was going on.
 _TCP stream_
 
 It seems to be encoded. We were given not only the `.pcap` file but also a `.DMP` - a memory dump - maybe the encoding algorithm was in the memory dump. So let's leave the `.pcap` there for now and inspect the memory dump.
-
+#### memdump inspection
 A memory dump suggests we use `Volatility`, so let's try it out.
 
 ```bash
@@ -315,7 +317,36 @@ else {
 sleep 1000 ; Write-Host "[i] Done!" -ForegroundColor Green ; Write-Host
 BSJB
 ```
+#### PowerShell code block analysis
+- Section:
+   - `#Design`: Suppresses the PowerShell errors and messages to avoid detection, detects if the system is Windows or not. If the system is Windows, changes the terminal to `YagiRansom` and changes the background to black and foreground to white.
+   - `#Error`: Checks if all the required parameters are provided; if not, prints an error and exits.
+   - `#Proxy Aware`: Ensures the script uses the system proxy settings as well as compatibility with multiple TLS (Transport Layer Security) protocols.
+   - `#Functions`: There are many functions in this section.
+     - `$OgE`: Stores the machine name.
+     - `$zVSza`: Stores the username.
+     - `$I26`: Stores the ransom note file name.
+     - `Invoke-AESEncryption`: Encrypts files using AES-256 encryption. Encrypts either text (-Text) or files (-Path) and output encrypted data as a Base64 string or a new .enc file.
+     - `RemoveWallpaper`: Removes the desktop wallpaper and set a solid red background.
+     - `PopUpRansom`: Displays a ransom pop-up window and a countdown timer before enabling the `Pay Now!` button. 
+     - `R64Encoder`: Encodes text or file contents into a Base64 format.
+     - `C2 Communication`: 
+       - `GetStatus`: Checks if the C2 server is online.
+       - `SendResults`: Send encryption results to the C2 server.
+       - `SendClose`: Tell the C2 server that the process was completed.
+       - `SendPay`: Tell the C2 server that the ransom was paid.
+       - `SendOK`: Final confirmation to the C2 server.
+     - `CreateReadme`: Creates `yaginote.txt` with: Ransom message and Bank Account.
+     - `EncryptFiles`: Encrypts all files in a directory and deletes the original.
+     - `ExfiltrateFiles`: Uploads encrypted file to the C2 server.
+     - `CheckFiles`: Check if any `.enc` files exist in `$Directory` 
+  
+> From the code we could see the program flow will be:
+> 1. Check the OS, the `args` and setup proxy for the C2
+> 2. Generate AES key then encrypt the files and log them.
+> 3. Send the results, logs to the C2 and exfiltrate `.enc` files.
+> 4. Create a ransom `readme` note and display a GUI popup with `Pay Now!` button
+> 5. Notify the C2 either `OK`, `Close` or `Pay Flags`
+{: .prompt-tip}
 
-- #Design: Suppresses the PowerShell error and messages to avoid detection, detects if the system is Windows or not. If the system is Windows, changes the terminal to `YagiRansom` and changes the background to black and foreground to white.
-- #Error: Check if all the required parameters are provided, if not prints an error and exits.
-- 
+Let's analyze each function more carefully
