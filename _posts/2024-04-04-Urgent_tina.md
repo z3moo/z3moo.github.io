@@ -578,7 +578,43 @@ $XoX = 0IzL5AzL5_DItASOwoDMwAiPgQmb2ZWMiBHZ18Gat4Wa3BiPgI3b0Fmc0NXaulWbkFGI+AiWs
 ```
 
 #### $2YngY
-We got `$XoX` and `$2YngY` was encrypted with bas64 to `$XoX`.
+We got `$XoX` and `$2YngY` was encrypted with bas64 to get `$XoX`.
 
 We could write a script to decode `$XoX` to get the data we need.
+
+```python
+import base64
+
+def reverse_decode(strings):
+    reversed_strings = strings[::-1]
+    replaced_strings = reversed_strings.replace("-", "+").replace("_", "/")
+
+    padding = len(replaced_strings) % 4
+    if padding:
+        replaced_strings += "=" * (4 - padding)
+    
+    decoded = base64.b64decode(replaced_strings)
+    return decoded
+
+XoX = "0IzL5AzL5_DItASOwoDMwAiPgQmb2ZWMiBHZ18Gat4Wa3BiPgI3b0Fmc0NXaulWbkFGI+AiWsZ_TkRFaupFVaNjYqZ_akpnV0RmbWVnWy40VTJjSRJ2X1cFZHZVUlhlTtQmbOBFTxQWWShFawV1V5MVUtp0STRkWxFlaORkTHZkRWRUV4ZlVOp0VnBiP"
+decoded = reverse_decode(XoX)
+print(decoded.decode('utf-8', errors='ignore'))
+```
+```powershell
+python .\B64Reverse.py
+> gWJNVVxUDVFFGNDNjQqZDSKJmQS9WUphXRYd1LPNnd-NXeQVGdW5_bQJ2SWN2ZuVndtVzdhFjb3ZTZnhTdLFlZ > administrator > win-ho5dpb1fvnd > 00:09 - ?/09/24
+```
+Remember ` $2YngY = "> $cVl > $OgE > $zVSza > $7VEq"` thus we could see that:
+- `$cVl`: gWJNVVxUDVFFGNDNjQqZDSKJmQS9WUphXRYd1LPNnd-NXeQVGdW5_bQJ2SWN2ZuVndtVzdhFjb3ZTZnhTdLFlZ
+- `$OgE`: administrator
+- `$zVSza`: win-ho5dpb1fvnd
+- `$7VEq`: 00:09 - ?/09/24
+
+#### $cvf
+And `$cVl` also base64 encoded from `$cvf`. Reuse the script to get what we need.
+```powershell
+python -u "e:\CTF\UrgentTina SVATTT\B64Reverse.py"
+fQKu8ge6wn1aw5mvungcVKbPlNVtePysBvsO/WXExiQoRBbJH6jB3C4aET51USIZ
+```
+#### 
 
