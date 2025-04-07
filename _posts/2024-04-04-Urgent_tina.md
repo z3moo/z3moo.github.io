@@ -7,6 +7,7 @@ tags: [forensics]
 
 ## Challenge Description: 
 Our client is a pessimist, she is worried that if she does not pay the ransom in the next 8 hours, the hacker will not give her any more chance to get her data back. We are trying to reassure her because we believe that our talented experts can find the cause and restore her data in less than 8 hours.
+
 Author: bquanman
 
 ## Thought process
@@ -554,7 +555,7 @@ That was tiresome ~~. We got the `.pcapng` file tho, this could help us to get t
 Luckily the data was right at the beginning.
 
 ![alt text](../assets/img/UrgentTina/2025-04-07_21-03.png)
-_TCP Stream_
+_HTTP Stream_
 
 ```http
 POST /data HTTP/1.1
@@ -587,7 +588,7 @@ import base64
 
 def reverse_decode(strings):
     reversed_strings = strings[::-1]
-    replaced_strings = reversed_strings.replace("-", "+").replace("_", "/")
+    replaced_strings = reversed_strings.replace("-", "C").replace("_", "E")
 
     padding = len(replaced_strings) % 4
     if padding:
@@ -602,13 +603,13 @@ print(decoded.decode('utf-8', errors='ignore'))
 ```
 ```powershell
 python .\B64Reverse.py
-> gWJNVVxUDVFFGNDNjQqZDSKJmQS9WUphXRYd1LPNnd-NXeQVGdW5_bQJ2SWN2ZuVndtVzdhFjb3ZTZnhTdLFlZ > administrator > win-ho5dpb1fvnd > 00:09 - ?/09/24
+> gWJNVVxUDVFFGNDNjQqZDSKJmQS9WUphXRYd1LPNnd-NXeQVGdW5_bQJ2SWN2ZuVndtVzdhFjb3ZTZnhTdLFlZ > administrator > win-ho5dpb1fvnd > 00:09 - 19/09/24
 ```
 Remember ` $2YngY = "> $cVl > $OgE > $zVSza > $7VEq"` thus we could see that:
 - `$cVl`: gWJNVVxUDVFFGNDNjQqZDSKJmQS9WUphXRYd1LPNnd-NXeQVGdW5_bQJ2SWN2ZuVndtVzdhFjb3ZTZnhTdLFlZ
 - `$OgE`: administrator
 - `$zVSza`: win-ho5dpb1fvnd
-- `$7VEq`: 00:09 - ?/09/24
+- `$7VEq`: 00:09 - 19/09/24
 
 #### $cvf
 And `$cVl` also base64 encoded from `$cvf`. Reuse the script to get what we need.
@@ -616,5 +617,161 @@ And `$cVl` also base64 encoded from `$cvf`. Reuse the script to get what we need
 python -u "e:\CTF\UrgentTina SVATTT\B64Reverse.py"
 fQKu8ge6wn1aw5mvungcVKbPlNVtePysBvsO/WXExiQoRBbJH6jB3C4aET51USIZ
 ```
-#### 
+`$cvf` was the result of the AES encryption. We need to find the key which was `$Uz19o`
+#### $Uz19o
+`Ctrl` + `F` with `$Uz19o` give us where we could get the value for this variable.
+```powershell
+$OgE = ([Environment]::MachineName).ToLower() ; $zVSza = ([Environment]::UserName).ToLower() ; $I26 = "yaginote.txt"
+$7VEq = Get-Date -Format "HH:mm - dd/MM/yy" ; $Uz19o = $7VEq.replace(":","").replace(" ","").replace("-","").replace("/","")+$zVSza+$OgE
+```
+`$Uz19o` was created from `$7VEq`, `$zVSza` and `$OgE`.
+- `$7VEq`: Date and time when the script was executed (found earlier ` 00:09 - 19/09/24` )
+- `$zVSza`: Machine name (found earlier `win-ho5dpb1fvnd`)
+- `$OgE`: User name (found earlier `administrator`)
 
+We got everything now let's find `$Uz19o`
+```python
+date_time = "00:09 - 19/09/24" # $7VEq
+username = "win-ho5dpb1fvnd"  # $zVSza
+machine_name = "administrator"  # $OgE
+
+formatted_date = date_time.replace(":", "").replace(" ", "").replace("-", "").replace("/", "")
+uz19o = formatted_date + username + machine_name
+
+print(uz19o)
+```
+```powershell
+python -u "e:\CTF\UrgentTina SVATTT\Uz.py"
+0009190924win-ho5dpb1fvndadministrator
+```
+#### $WiETm
+We got all the data to find `$WiETm` now.
+
+```python
+from Crypto.Hash import SHA256
+from Crypto.Cipher import AES
+import base64
+
+def decrypt_aes(ciphertext, key):
+    hashed_key = SHA256.new(key.encode('utf-8')).digest()
+    
+    enc_bytes = base64.b64decode(ciphertext)
+    
+    iv = enc_bytes[:16]
+    cipher_strings = enc_bytes[16:]
+    
+    cipher = AES.new(hashed_key, AES.MODE_CBC, iv)
+    decrypted = cipher.decrypt(cipher_strings)
+    
+    decrypted = decrypted.rstrip(b"\0")
+    return decrypted.decode('utf-8')
+
+cvf = "fQKu8ge6wn1aw5mvungcVKbPlNVtePysBvsO/WXExiQoRBbJH6jB3C4aET51USIZ" 
+Uz19o = "0009190924win-ho5dpb1fvndadministrator" 
+WiETm = decrypt_aes(cvf, Uz19o) 
+print(WiETm)
+```
+```powershell
+python -u "e:\CTF\UrgentTina SVATTT\AESDecrypt.py"
+YaMfem0zr4jdiZsDUxv1TH69
+```
+Finally we got `$WiETm: YaMfem0zr4jdiZsDUxv1TH69` now
+
+#### Logs 
+
+We only need to decrypt the logs that were sent to endpoint $7CiB:$UFX/logs
+
+![alt text](../assets/img/UrgentTina/2025-04-08_01-06.png)
+_HTTP Stream_
+
+```http
+POST /logs HTTP/1.1
+User-Agent: Mozilla/5.0 (Windows NT; Windows NT 6.2; en-US) WindowsPowerShell/5.1.19041.1237
+Content-Type: application/x-www-form-urlencoded
+Host: 192.168.240.1:443
+Content-Length: 5700
+
+kVGdwlncj5WZgc3buBycpByZwpmLy_TYykjN4_jYjNWO1YTM3cjNmJmZxgjMmFWZycjN5Y2X1cTO4YDOzIjM5kzMzoHXzRnbl1Wdj9GRcJXZzVVRJx1cyV2cVxlODBSXhsFIkVGdwlncj5WZgc3buBycpByZwpmLtFmb0VWa2x1c05WZtV3YvR_XyV2cVVUScNnclNXVcpzQg0VIbB-ZlRHc5J3YuVGI39mbgMXagcGcq5iN1QzN5ATMt0WY0NXLuFWYpR3chJWZz1ycsVGelBHXzRnbl1Wdj9GRcJXZzVVRJx1cyV2cVxlODBSXhsFIkVGdwlncj5WZgc3buBycpByZuBnLtlWbcNHduVWb1N2b_xlclNXVFl_XzJXZzVFX6M_IdFyWgQWZ0BXeyNmblBydv5GIzlGInBnauADM0gHMwQzXmdjYzoXLNpGXzRnbl1Wdj9GRcJXZzVVRJx1cyV2cVxlODBSXhsFIkVGdwlncj5WZgc3buBycpBiZkBnLzVmc1R3YlRXaoNmch9FZuF2XzRnbl1WZylWdxVmcfNnbvlGdhJXZkl2cu92YfNWZTR1bJ9Ve0lmc1NWZz9FVvl_XzRnbl1Wdj9GRcJXZzVVRJx1cyV2cVxlODBSXhsFIkVGdwlncj5WZgc3buBycpB-d4RnL581ZhxmZcNHduVWb1N2b_xlclNXVFl_XzJXZzVFX6M_IdFyWgQWZ0BXeyNmblBydv5GIzlGI0hHdugzXnFGbmx1c05WZtV3YvR_XyV2cVVUScNnclNXVcpzQg0VIbB-ZlRHc5J3YuVGI39mbgMXagQHe05yNfdWYsZGXzRnbl1Wdj9GRcJXZzVVRJx1cyV2cVxlODBSXhsFIkVGdwlncj5WZgc3buBycpB-d4RnL281ZhxmZcNHduVWb1N2b_xlclNXVFl_XzJXZzVFX6M_IdFyWgQWZ0BXeyNmblBydv5GIzlGI0hHdukTNfdWYsZGXzRnbl1Wdj9GRcJXZzVVRJx1cyV2cVxlODBSXhsFIkVGdwlncj5WZgc3buBycpB-d4RnL4UzXnFGbmx1c05WZtV3YvR_XyV2cVVUScNnclNXVcpzQg0VIbB-ZlRHc5J3YuVGI39mbgMXagQHe05yN181ZhxmZcNHduVWb1N2b_xlclNXVFl_XzJXZzVFX6M_IdFyWgQWZ0BXeyNmblBydv5GIzlGI0hHduYTNfdWYsZGXzRnbl1Wdj9GRcJXZzVVRJx1cyV2cVxlODBSXhsFIkVGdwlncj5WZgc3buBycpB-d4RnL1UzXnFGbmx1c05WZtV3YvR_XyV2cVVUScNnclNXVcpzQg0VIbB-ZlRHc5J3YuVGI39mbgMXagQHe05-N181ZhxmZcNHduVWb1N2b_xlclNXVFl_XzJXZzVFX6M_IdFyWgQWZ0BXeyNmblBydv5GIzlGI0hHduMTNfdWYsZGXzRnbl1Wdj9GRcJXZzVVRJx1cyV2cVxlODBSXhsFIkVGdwlncj5WZgc3buBycpB-d4RnLyUzXnFGbmx1c05WZtV3YvR_XyV2cVVUScNnclNXVcpzQg0VIbB-ZlRHc5J3YuVGI39mbgMXagQHe05SM181ZhxmZcNHduVWb1N2b_xlclNXVFl_XzJXZzVFX6M_IdFyWgQWZ0BXeyNmblBydv5GIzlGI0hHduATNfdWYsZGXzRnbl1Wdj9GRcJXZzVVRJx1cyV2cVxlODBSXhsFIkVGdwlncj5WZgc3buBycpB-d4RnL181ZhxmZcNHduVWb1N2b_xlclNXVFl_XzJXZzVFX6M_IdFyWgQWZ0BXeyNmblBydv5GIzlGI0hHdukDNfdWYsZGXzRnbl1Wdj9GRcJXZzVVRJx1cyV2cVxlODBSXhsFIkVGdwlncj5WZgc3buBycpB-d4RnL4QzXnFGbmx1c05WZtV3YvR_XyV2cVVUScNnclNXVcpzQg0VIbB-ZlRHc5J3YuVGI39mbgMXagQHe05yN081ZhxmZcNHduVWb1N2b_xlclNXVFl_XzJXZzVFX6M_IdFyWgQWZ0BXeyNmblBydv5GIzlGI0hHduYDNfdWYsZGXzRnbl1Wdj9GRcJXZzVVRJx1cyV2cVxlODBSXhsFIkVGdwlncj5WZgc3buBycpB-d4RnL1QzXnFGbmx1c05WZtV3YvR_XyV2cVVUScNnclNXVcpzQg0VIbB-ZlRHc5J3YuVGI39mbgMXagQHe05-N081ZhxmZcNHduVWb1N2b_xlclNXVFl_XzJXZzVFX6M_IdFyWgQWZ0BXeyNmblBydv5GIzlGI0hHduMDNfdWYsZGXzRnbl1Wdj9GRcJXZzVVRJx1cyV2cVxlODBSXhsFIkVGdwlncj5WZgc3buBycpB-d4RnLyQzXnFGbmx1c05WZtV3YvR_XyV2cVVUScNnclNXVcpzQg0VIbB-ZlRHc5J3YuVGI39mbgMXagQHe05SM081ZhxmZcNHduVWb1N2b_xlclNXVFl_XzJXZzVFX6M_IdFyWgQWZ0BXeyNmblBydv5GIzlGI0hHduADNfdWYsZGXzRnbl1Wdj9GRcJXZzVVRJx1cyV2cVxlODBSXhsFIkVGdwlncj5WZgc3buBycpB-d4RnL081ZhxmZcNHduVWb1N2b_xlclNXVFl_XzJXZzVFX6M_IdFyWgQWZ0BXeyNmblBydv5GIzlGI0hHdukzMfdWYsZGXzRnbl1Wdj9GRcJXZzVVRJx1cyV2cVxlODBSXhsFIkVGdwlncj5WZgc3buBycpB-d4RnL4MzXnFGbmx1c05WZtV3YvR_XyV2cVVUScNnclNXVcpzQg0VIbB-ZlRHc5J3YuVGI39mbgMXagQHe05yNz81ZhxmZcNHduVWb1N2b_xlclNXVFl_XzJXZzVFX6M_IdFyWgQWZ0BXeyNmblBydv5GIzlGI0hHduYzMfdWYsZGXzRnbl1Wdj9GRcJXZzVVRJx1cyV2cVxlODBSXhsFIkVGdwlncj5WZgc3buBycpB-d4RnL1MzXnFGbmx1c05WZtV3YvR_XyV2cVVUScNnclNXVcpzQg0VIbB-ZlRHc5J3YuVGI39mbgMXagQHe05-Nz81ZhxmZcNHduVWb1N2b_xlclNXVFl_XzJXZzVFX6M_IdFyWgQWZ0BXeyNmblBydv5GIzlGI0hHduMzMfdWYsZGXzRnbl1Wdj9GRcJXZzVVRJx1cyV2cVxlODBSXhsFIkVGdwlncj5WZgc3buBycpB-d4RnLyMzXnFGbmx1c05WZtV3YvR_XyV2cVVUScNnclNXVcpzQg0VIbB-ZlRHc5J3YuVGI39mbgMXagQHe05SMz81ZhxmZcNHduVWb1N2b_xlclNXVFl_XzJXZzVFX6M_IdFyWgQWZ0BXeyNmblBydv5GIzlGI0hHduAzMfdWYsZGXzRnbl1Wdj9GRcJXZzVVRJx1cyV2cVxlODBSXhsFIkVGdwlncj5WZgc3buBycpB-d4RnLz81ZhxmZcNHduVWb1N2b_xlclNXVFl_XzJXZzVFX6M_IdFyWgQWZ0BXeyNmblBydv5GIzlGI0hHdukjMfdWYsZGXzRnbl1Wdj9GRcJXZzVVRJx1cyV2cVxlODBSXhsFIkVGdwlncj5WZgc3buBycpB-d4RnL4IzXnFGbmx1c05WZtV3YvR_XyV2cVVUScNnclNXVcpzQg0VIbB-ZlRHc5J3YuVGI39mbgMXagQHe05yNy81ZhxmZcNHduVWb1N2b_xlclNXVFl_XzJXZzVFX6M_IdFyWgQWZ0BXeyNmblBydv5GIzlGI0hHduYjMfdWYsZGXzRnbl1Wdj9GRcJXZzVVRJx1cyV2cVxlODBSXhsFIkVGdwlncj5WZgc3buBycpB-d4RnL1IzXnFGbmx1c05WZtV3YvR_XyV2cVVUScNnclNXVcpzQg0VIbB-ZlRHc5J3YuVGI39mbgMXagQHe05-Ny81ZhxmZcNHduVWb1N2b_xlclNXVFl_XzJXZzVFX6M_IdFyWgQWZ0BXeyNmblBydv5GIzlGI0hHduMjMfdWYsZGXzRnbl1Wdj9GRcJXZzVVRJx1cyV2cVxlODBSXhsFIkVGdwlncj5WZgc3buBycpB-d4RnLyIzXnFGbmx1c05WZtV3YvR_XyV2cVVUScNnclNXVcpzQg0VIbB-ZlRHc5J3YuVGI39mbgMXagQHe05SMy81ZhxmZcNHduVWb1N2b_xlclNXVFl_XzJXZzVFX6M_IdFyWgQWZ0BXeyNmblBydv5GIzlGI0hHduAjMfdWYsZGXzRnbl1Wdj9GRcJXZzVVRJx1cyV2cVxlODBSXhsFIkVGdwlncj5WZgc3buBycpB-d4RnLy81ZhxmZcNHduVWb1N2b_xlclNXVFl_XzJXZzVFX6M_IdFyWgQWZ0BXeyNmblBydv5GIzlGI0hHdukTMfdWYsZGXzRnbl1Wdj9GRcJXZzVVRJx1cyV2cVxlODBSXhsFIkVGdwlncj5WZgc3buBycpB-d4RnL4_zXnFGbmx1c05WZtV3YvR_XyV2cVVUScNnclNXVcpzQg0VIbB-ZlRHc5J3YuVGI39mbgMXagQHe05yNx81ZhxmZcNHduVWb1N2b_xlclNXVFl_XzJXZzVFX6M_IdFyWgQWZ0BXeyNmblBydv5GIzlGI0hHduYTMfdWYsZGXzRnbl1Wdj9GRcJXZzVVRJx1cyV2cVxlODBSXhsFIkVGdwlncj5WZgc3buBycpB-d4RnL1_zXnFGbmx1c05WZtV3YvR_XyV2cVVUScNnclNXVcpzQg0VIbB-ZlRHc5J3YuVGI39mbgMXagQHe05-Nx81ZhxmZcNHduVWb1N2b_xlclNXVFl_XzJXZzVFX6M_IdFyWgQWZ0BXeyNmblBydv5GIzlGI0hHduMTMfdWYsZGXzRnbl1Wdj9GRcJXZzVVRJx1cyV2cVxlODBSXhsFIkVGdwlncj5WZgc3buBycpB-d4RnLy_zXnFGbmx1c05WZtV3YvR_XyV2cVVUScNnclNXVcpzQg0VIbB-ZlRHc5J3YuVGI39mbgMXagQHe05SMx81ZhxmZcNHduVWb1N2b_xlclNXVFl_XzJXZzVFX6M_IdFyWgQWZ0BXeyNmblBydv5GIzlGI0hHduATMfdWYsZGXzRnbl1Wdj9GRcJXZzVVRJx1cyV2cVxlODBSXhsFIkVGdwlncj5WZgc3buBycpB-d4RnLx81ZhxmZcNHduVWb1N2b_xlclNXVFl_XzJXZzVFX6M_IdFyWgQWZ0BXeyNmblBydv5GIzlGIn5Gcus2YhxmYcNHduVWb1N2b_xlclNXVFl_XzJXZzVFX6M_IdFyWgQWZ0BXeyNmblBydv5GIzlGInBnaugzYyMTMmdzYkJWNykjMzAjMxkTY0QDMhRWY5MjNxQWYcNHduVWb1N2b_xlclNXVFl_XzJXZzVFX6M_IdFyWgQWZ0BXeyNmblBydv5GIzlGInBnau42X1MjM5QzNyITO3IjN4kjN0IjM28FOzMTN4MjM4IjMwcDMzIzXzMjM4YzM4QjMcNHduVWb1N2b_xlclNXVFl_XzJXZzVFX6M_IdFyWgQWZ0BXeyNmblBydv5GIzlGIn5GcuQWZ1YDN4UzYjZTMxgTNkNGZhFTNzMjY4cDZ1UWYiNTMcNHduVWb1N2b_xlclNXVFl_XzJXZzVFX6M_IdFyW
+
+```
+The logs were encrypted with R64Encoder so we'll reuse the script we used before.
+
+![alt text](../assets/img/UrgentTina/2025-04-08_01-16.png)
+
+It's a bit hard to read, so we can modify the script a bit.
+
+```powershell
+ python .\B64ReverseLogs.py
+[!]
+ C:\Users\IEUser\Documents\13bae5d78b3351adcd58116cc58465ed.png is now encrypted [!]
+ C:\Users\IEUser\Documents\248368233_230702282385338_6224698627922749235_n.jpg is now encrypted [!]
+ C:\Users\IEUser\Documents\ad1639ada044a912032925bdc7f132c8.jpg is now encrypted [!]
+ C:\Users\IEUser\Documents\black.png is now encrypted [!]
+ C:\Users\IEUser\Documents\flag_1.txt is now encrypted [!]
+ C:\Users\IEUser\Documents\flag_10.txt is now encrypted [!]
+ C:\Users\IEUser\Documents\flag_11.txt is now encrypted [!]
+ C:\Users\IEUser\Documents\flag_12.txt is now encrypted [!]
+ C:\Users\IEUser\Documents\flag_13.txt is now encrypted [!]
+ C:\Users\IEUser\Documents\flag_14.txt is now encrypted [!]
+ C:\Users\IEUser\Documents\flag_15.txt is now encrypted [!]
+ C:\Users\IEUser\Documents\flag_16.txt is now encrypted [!]
+ C:\Users\IEUser\Documents\flag_17.txt is now encrypted [!]
+ C:\Users\IEUser\Documents\flag_18.txt is now encrypted [!]
+ C:\Users\IEUser\Documents\flag_19.txt is now encrypted [!]
+ C:\Users\IEUser\Documents\flag_2.txt is now encrypted [!]
+ C:\Users\IEUser\Documents\flag_20.txt is now encrypted [!]
+ C:\Users\IEUser\Documents\flag_21.txt is now encrypted [!]
+ C:\Users\IEUser\Documents\flag_22.txt is now encrypted [!]
+ C:\Users\IEUser\Documents\flag_23.txt is now encrypted [!]
+ C:\Users\IEUser\Documents\flag_24.txt is now encrypted [!]
+ C:\Users\IEUser\Documents\flag_25.txt is now encrypted [!]
+ C:\Users\IEUser\Documents\flag_26.txt is now encrypted [!]
+ C:\Users\IEUser\Documents\flag_27.txt is now encrypted [!]
+ C:\Users\IEUser\Documents\flag_28.txt is now encrypted [!]
+ C:\Users\IEUser\Documents\flag_29.txt is now encrypted [!]
+ C:\Users\IEUser\Documents\flag_3.txt is now encrypted [!]
+ C:\Users\IEUser\Documents\flag_30.txt is now encrypted [!]
+ C:\Users\IEUser\Documents\flag_31.txt is now encrypted [!]
+ C:\Users\IEUser\Documents\flag_32.txt is now encrypted [!]
+ C:\Users\IEUser\Documents\flag_33.txt is now encrypted [!]
+ C:\Users\IEUser\Documents\flag_34.txt is now encrypted [!]
+ C:\Users\IEUser\Documents\flag_35.txt is now encrypted [!]
+ C:\Users\IEUser\Documents\flag_36.txt is now encrypted [!]
+ C:\Users\IEUser\Documents\flag_37.txt is now encrypted [!]
+ C:\Users\IEUser\Documents\flag_38.txt is now encrypted [!]
+ C:\Users\IEUser\Documents\flag_39.txt is now encrypted [!]
+ C:\Users\IEUser\Documents\flag_4.txt is now encrypted [!]
+ C:\Users\IEUser\Documents\flag_40.txt is now encrypted [!]
+ C:\Users\IEUser\Documents\flag_41.txt is now encrypted [!]
+ C:\Users\IEUser\Documents\flag_42.txt is now encrypted [!]
+ C:\Users\IEUser\Documents\flag_43.txt is now encrypted [!]
+ C:\Users\IEUser\Documents\flag_44.txt is now encrypted [!]
+ C:\Users\IEUser\Documents\flag_45.txt is now encrypted [!]
+ C:\Users\IEUser\Documents\flag_46.txt is now encrypted [!]
+ C:\Users\IEUser\Documents\flag_47.txt is now encrypted [!]
+ C:\Users\IEUser\Documents\flag_48.txt is now encrypted [!]
+ C:\Users\IEUser\Documents\flag_49.txt is now encrypted [!]
+ C:\Users\IEUser\Documents\flag_5.txt is now encrypted [!]
+ C:\Users\IEUser\Documents\flag_50.txt is now encrypted [!]
+ C:\Users\IEUser\Documents\flag_51.txt is now encrypted [!]
+ C:\Users\IEUser\Documents\flag_52.txt is now encrypted [!]
+ C:\Users\IEUser\Documents\flag_53.txt is now encrypted [!]
+ C:\Users\IEUser\Documents\flag_54.txt is now encrypted [!]
+ C:\Users\IEUser\Documents\flag_55.txt is now encrypted [!]
+ C:\Users\IEUser\Documents\flag_56.txt is now encrypted [!]
+ C:\Users\IEUser\Documents\flag_57.txt is now encrypted [!]
+ C:\Users\IEUser\Documents\flag_58.txt is now encrypted [!]
+ C:\Users\IEUser\Documents\flag_59.txt is now encrypted [!]
+ C:\Users\IEUser\Documents\flag_6.txt is now encrypted [!]
+ C:\Users\IEUser\Documents\flag_7.txt is now encrypted [!]
+ C:\Users\IEUser\Documents\flag_8.txt is now encrypted [!]
+ C:\Users\IEUser\Documents\flag_9.txt is now encrypted [!]
+ C:\Users\IEUser\Documents\IoT_security_IoTSec_considerations_requirements_and_architectures.pdf is now encrypted [!]
+ C:\Users\IEUser\Documents\jM-z3b7f_400x400.jpg is now encrypted [!]
+ C:\Users\IEUser\Documents\mim.png is now encrypted [!]
+ C:\Users\IEUser\Documents\pexels-sebastiaan-stam-1097456.jpg is now encrypted [!]
+ C:\Users\IEUser\Documents\vietnam.jpg is now encrypted [!]
+ C:\Users\IEUser\Documents\z3399223868975_f9672eaf281fbf6771659ccb18692a12.jpg is now encrypted
+ ```
+
+Bingo, many `.txt` file was encrypted.
