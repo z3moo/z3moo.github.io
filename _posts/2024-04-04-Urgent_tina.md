@@ -1021,7 +1021,7 @@ _PowerShell related modules_
 
 Running diagnostic analysis, we could confirm that the program used PowerShell:
 
-![alt text](image.png)
+![alt text](../assets/img/UrgentTina/2025-04-09_01-42.png)
 _Diagnostic analysis_
 
 We won't find the `update.ps1` here; that's where we return to the `strings` method.
