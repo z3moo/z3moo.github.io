@@ -1042,3 +1042,5 @@ The malware avoids encrypting OS files, uses AES with randomized keys for the en
 
 > Thanks to the `.pcapng` file, we were able to solve this challenge. This highlights the importance of enabling DNS, HTTP, and command-line logging (through tools like Sysmon, Windows Defender ATP, etc.).
 {: .prompt-tip}
+
+That's all for this challenge :33 Peaceeeeee
