@@ -2,7 +2,7 @@
 title: ASCIS 2024 Urgent Tina Write Up
 date: 2025-04-04 00:00:00 + 0800
 categories: [Writeups, ASCIS]
-tags: [forensics]     
+tags: [forensics, malware forensics]     
 ---
 
 ## Challenge Description: 
@@ -10,6 +10,7 @@ Our client is a pessimist, she is worried that if she does not pay the ransom in
 
 Author: bquanman
 
+>! ASCIS{N0th1n9_1$_m0r3_pr3c10u5_7h4n_1ndEp3ndenc3_&_fr33d0m}
 ## Thought process
 ### File inspection
 We are given a `.pcapng` and a `.DMP` file.
@@ -1006,3 +1007,4 @@ ASCIS{N0th1n9_1$_m0r3_pr3c10u5_7h4n_1ndEp3ndenc3_&_fr33d0m}
 
 > ASCIS{N0th1n9_1$_m0r3_pr3c10u5_7h4n_1ndEp3ndenc3_&_fr33d0m}
 {: .prompt-info }
+
