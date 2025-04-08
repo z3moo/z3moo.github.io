@@ -1028,9 +1028,16 @@ We won't find the `update.ps1` here; that's where we return to the `strings` met
 
 ## Thoughts on the challenge
 
-Pretty fun challenge to do, 
+This was a pretty fun challenge. Finding the PowerShell script was particularly challenging from the get-go since we didn't know what we were looking for.
 
+Based on the `MITRE ATT&CK Framework`, the following techniques were used in this malware:
 
+- `T1059.001`: Command and Scripting Interpreter: PowerShell
+- `T1486`: Data Encrypted for Impact
+- `T1041`: Exfiltration Over C2 Channel
+- `T1564.001`: Hide Artifacts: Hidden Files and Directories
+- `T1027`: Obfuscated Files or Information
 
+The malware avoids encrypting OS files, uses AES with randomized keys for the encryption process. Exfiltration is HTTP-based with a combination of base64, AES, and ZIP encoding.
 
-
+Thanks to the .pcapng file, we were able to solve this challenge. This highlights the importance of enabling DNS, HTTP, and command-line logging (through tools like Sysmon, Windows Defender ATP, etc.).
