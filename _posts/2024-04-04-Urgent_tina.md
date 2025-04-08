@@ -1040,4 +1040,5 @@ Based on the `MITRE ATT&CK Framework`, the following techniques were used in thi
 
 The malware avoids encrypting OS files, uses AES with randomized keys for the encryption process. Exfiltration is HTTP-based with a combination of base64, AES, and ZIP encoding.
 
-Thanks to the .pcapng file, we were able to solve this challenge. This highlights the importance of enabling DNS, HTTP, and command-line logging (through tools like Sysmon, Windows Defender ATP, etc.).
+> Thanks to the `.pcapng` file, we were able to solve this challenge. This highlights the importance of enabling DNS, HTTP, and command-line logging (through tools like Sysmon, Windows Defender ATP, etc.).
+{: .prompt-tip}
