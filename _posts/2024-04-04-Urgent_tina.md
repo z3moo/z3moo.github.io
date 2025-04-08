@@ -1005,8 +1005,30 @@ print(decoded_output)
 python .\FinalDecryptttt.py
 ASCIS{N0th1n9_1$_m0r3_pr3c10u5_7h4n_1ndEp3ndenc3_&_fr33d0m}
 ```
+## Note
 
-## Summary
+When analyzing the memdump, I used the 'strings' command to capture the PowerShell script as well as to check the processes running within the memory dump. But there are better ways to do this.
+
+We could load the memdump into Visual Studio to check the memdump modules:
+
+![alt text](../assets/img/UrgentTina/2025-04-08_22-13.png)
+_update.DMP in Visual Studio_
+
+We could see the process name as well as the modules that were loaded. After some searching, we could determine that the program was executing a PowerShell script.
+
+![alt text](../assets/img/UrgentTina/2025-04-09_00-45.png)
+_PowerShell related modules_
+
+Running diagnostic analysis, we could confirm that the program used PowerShell:
+
+![alt text](image.png)
+_Diagnostic analysis_
+
+We won't find the `update.ps1` here; that's where we return to the `strings` method.
+
+## Thoughts on the challenge
+
+Pretty fun challenge to do, 
 
 
 
