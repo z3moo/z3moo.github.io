@@ -806,7 +806,7 @@ Looking at the HTTP stream we could see the process too.
 
 ![alt text](../assets/img/UrgentTina/2025-04-08_01-47.png)
 
-After some decoding the file's name we could indicate where we need to start. At `/files/j5WZuQHe05-Mx81ZhxmZ` since it's `flag_1.txt`
+After decoding the file names, we can determine where to start: at `/files/j5WZuQHe05-Mx81ZhxmZ` since it's `flag_1.txt`.
 
 With a little help from good old ChatGPT :> I could use this script to extract the `file's name : data` to `output.txt`
 
@@ -882,71 +882,127 @@ def natural_sort_key(s):
 
 post_data.sort(key=natural_sort_key)
 
+
 output_file = "decoded_output.txt"
 with open(output_file, "w", encoding="utf-8") as f:
     for data in post_data:
-        f.write(data + "\n\n")
-```
-This script decodes all URLs and payloads from HTTP POST requests in the `.pcapng` file. It specifically extracts and decodes data related to flag files, then sorts them by number and saves the results to `decoded_output.txt`. Here's the decoded output:
+        data = data.strip().split(" : ", 1)[1].strip() 
+        f.write(data + "\n")
 
 ```
-flag_1.txt.enc : 0NaXoN6fZexANHcU0Q+PtJtipYzI1MWcVGsKGQGi4v/
-flag_2.txt.enc : Iz8pc9b88c1mOQHmc1hH5+xRDVFsPzL___qz1F-L724
-flag_3.txt.enc : IAjJSPH1fgXSn659HaDJu9Tdob60WIocHOc1Kfa-IkY
-flag_4.txt.enc : ovz+j4Q1GiLLxdVqoPWohve60Nr/3Lwqba0yYxPkQ/0
-flag_5.txt.enc : sWpGT6d6xXQxdV2ZASbUUiMOgeKUyGJkzMHwsQNM-7T
-flag_6.txt.enc : 0h7yIaG-lmzfeSHpF/caBFusl8KRGnPLuYvWw4_o-zL
-flag_7.txt.enc : IZlAZWhTVPnUB3yr9D11+JGlTNmIAYkg16bXjc_BWzs
-flag_8.txt.enc : Mzmqd+n3r0Vz/TpoaWHGLDcKndIzd9r-Oqw1t4TFcw7
-flag_9.txt.enc : kUfLVO1h2r1R7c_a0A8lTDh1Q+g6KovyM5RtRVPd/Og
-flag_10.txt.enc : AP6WHYj/iIeVJpLYXKZDjVLsWxyKbp1UGbApg8FeIzy
-flag_11.txt.enc : sdbNtnSpme/IKsR8lnccrkrUQ8LnmG9Hre+ZPu9pzfI
-flag_12.txt.enc : IPQButt+ZPszbfnFuxcwm8k7xsIW9UGyHa9ni/IHu0O
-flag_13.txt.enc : UAOq1KVjPH2Wgewl8tyRwIhXLM-adWVTh0AjnTGUk-i
-flag_14.txt.enc : oX9rxi+jGLsyYqFZ6HXnZZw/QJod5Z+_QT9kPr_SjSf
-flag_15.txt.enc : 49gqimKu1B11q9h5bOOxybdxiSqwdN6YdOrPHGHf_e+
-flag_16.txt.enc : MSsr5rHr6DGetJzYdi+-94kFFbBk+briOAm7s2OXpdu
-flag_17.txt.enc : At+eeUxAhPUl8K87Dihj1ca_z-aK7wtWm_kP0y4xewt
-flag_18.txt.enc : ISOWbQnQ9zmXmjRSpd6b1YGSdIH7/FX4q2dZSvgaUtv
-flag_19.txt.enc : M7PI81by1P7N_O3cXaaVQZPf/-/+-TKNSYuuxWLrM++
-flag_20.txt.enc : oxyTKzWBhT3k6_DXdk8w/vdQqoNADs33+1uofd1ag85
-flag_21.txt.enc : 8ZM5IvDhvUe3oyorBcLNVGn8jHkeV1ugcw7YLkkrsOh
-flag_22.txt.enc : IUABjgWWScWKL61QX6SL1ZInpgTraKhUlsnRwftK51w
-flag_23.txt.enc : AjqTGzWp1NU_c3osnj5UiMqoSjyr+cWS1zRkPraXZia
-flag_24.txt.enc : cVjuho2jDb52OThxF-x-hU4g/_f3UfcbnOjW4rV8/8B
-flag_25.txt.enc : YY5ual0Zjw2LQRl3cMkqbXVRD/ccj8N1nKypZY+chbh
-flag_26.txt.enc : _uDVjd009Xph0iNy5jFbZu-G+r9_VTWtd8bn/WmhHa1
-flag_27.txt.enc : oq45d7S6pe_Ow7WPz95_/ceoLpl7eTyTl-B+ukcaDzZ
-flag_28.txt.enc : wfK8MdOj8TVV7URziByBOKeaAF6q-gSJisvJqur2bhc
-flag_29.txt.enc : sAciFmeJz9eN-Tp9VXb4TVar_9Gb/72uGa/RVrh_IQu
-flag_30.txt.enc : 8Gd2ZYvnhuZS9sPs3zZ_QRAIPIixf9un046KTDzfA+L
-flag_31.txt.enc : sZVwZ1WkJOb4o9uhLjAx58cMZ5VNggXTrDaywWuNwx2
-flag_32.txt.enc : I4PPy59X8GiVHnU_a_saMvGWbqPMOiHpRwtY5kadUPF
-flag_33.txt.enc : 8cnQt_79-/l4G5I3UQs0eRUyoGB6rdSXlJe-ZLqiaj+
-flag_34.txt.enc : MNojovs4bjD+_O0ReYV8B3tXWet/gGO9Vmv/h9TRI1M
-flag_35.txt.enc : _6Apj84DodnhHXzs23taUK1Q5Xg4fNyhmsu00eKk0T3
-flag_36.txt.enc : Qm0g/vv0pGZKaOXOkNL73o4/-lMW3xVwFRDh9px8WRU
-flag_37.txt.enc : MXzDZsAazbswbZQrBO8dGk_8+Ox-85rwOi_akbXkytd
-flag_38.txt.enc : Y95QY2ADl-Ma1JhiOO0xAW-iXXifoydMji4MIXdD6_q
-flag_39.txt.enc : 4WKyk6O_+-I5m_HIlmz_sWs5TS6rivrirGt/SmQreXh
-flag_40.txt.enc : A/51-ZUiV5Rr-XXFWWmQVunUYp2FI26GWa5goTBnufo
-flag_41.txt.enc : 0-mzzX-WGHYXJ1Jzu1ZViOR/Z6coGsGIG+1RscRuy2j
-flag_42.txt.enc : 0LrHb8yls--qBcHxx6In3-nT7-0zDJYHtRZ8yQbYms4
-flag_43.txt.enc : IuuPZrbgKeL+k6lHIBep7njjinpKa_Of-yuDoGAb8f0
-flag_44.txt.enc : kXt8cBp/yuR+/000Y3McIOXuMV4/F73ODpsYFtBi96i
-flag_45.txt.enc : YjluSk8L5xvmivpWb-LR2YHt_8dSh8M3TB7ps-UIh6Q
-flag_46.txt.enc : YZH5Zwm57hf3GZcSDZgwg-wthUzJpGImB1wRH97B2h1
-flag_47.txt.enc : gD4JPXlJJ0NqSiG57+p/opBLBPj1wk51SV8NNQozPha
-flag_48.txt.enc : snlwDu_2oZ1nJvV4SUzrjjNwnX_p0USQDFSAP7HviKZ
-flag_49.txt.enc : 454DgPfVhcb3pJpjLjxfAxtUHhngRGrvTYrzwM8m_1Y
-flag_50.txt.enc : _k+mQ1N+HjeVRVVmHHy0IBs0bHsRbI_MLLJLKcjjZs4
-flag_51.txt.enc : 0sgM4yYBHYckscKzzgnkIQGVjXvS-5TeQ31YixBK1S1
-flag_52.txt.enc : 0D10/t/sx2ubSLesvfBpBHQ3IzANTKt36Gpza4gL175
-flag_53.txt.enc : IvBGSaSNtyMb-dZMaKkbGAmuhMHMnTtctxgRjRORKy8
-flag_54.txt.enc : cFDmohU81k2dQZRTh-WAhqU5KTfw2my0OdTI7v8sw2l
-flag_55.txt.enc : U2Ny2Z2l8O6ydHHRc55wfksWP6K7wc0fagggW92zPYO
-flag_56.txt.enc : 4S4/i/2trkTDuaiZu6mMHDcxo+T/ixX08oSLRtqo/an
-flag_57.txt.enc : I-Nygh527T+JZxrf3D1cciQtpttih6S59QB9w1_t02e
-flag_58.txt.enc : IKu3_m5xI0ASe6efLJDOyHeKRf6NjnVVIi0/9FeOBeI
-flag_59.txt.enc : gFcuLzU5jQwJBmAoUqDyTMO/7FO24dRLGbF4TsLgmKw
+This script decodes all URLs and payloads from HTTP POST requests in the `.pcapng` file. It specifically extracts and decodes data related to flag files, then sorts them by number and saves the results to `output.txt`. Thanks ChatGPT
 ```
+0NaXoN6fZexANHcU0Q+PtJtipYzI1MWcVGsKGQGi4v/
+Iz8pc9b88c1mOQHmc1hH5+xRDVFsPzL___qz1F-L724
+IAjJSPH1fgXSn659HaDJu9Tdob60WIocHOc1Kfa-IkY
+ovz+j4Q1GiLLxdVqoPWohve60Nr/3Lwqba0yYxPkQ/0
+sWpGT6d6xXQxdV2ZASbUUiMOgeKUyGJkzMHwsQNM-7T
+0h7yIaG-lmzfeSHpF/caBFusl8KRGnPLuYvWw4_o-zL
+IZlAZWhTVPnUB3yr9D11+JGlTNmIAYkg16bXjc_BWzs
+Mzmqd+n3r0Vz/TpoaWHGLDcKndIzd9r-Oqw1t4TFcw7
+kUfLVO1h2r1R7c_a0A8lTDh1Q+g6KovyM5RtRVPd/Og
+AP6WHYj/iIeVJpLYXKZDjVLsWxyKbp1UGbApg8FeIzy
+sdbNtnSpme/IKsR8lnccrkrUQ8LnmG9Hre+ZPu9pzfI
+IPQButt+ZPszbfnFuxcwm8k7xsIW9UGyHa9ni/IHu0O
+UAOq1KVjPH2Wgewl8tyRwIhXLM-adWVTh0AjnTGUk-i
+oX9rxi+jGLsyYqFZ6HXnZZw/QJod5Z+_QT9kPr_SjSf
+49gqimKu1B11q9h5bOOxybdxiSqwdN6YdOrPHGHf_e+
+MSsr5rHr6DGetJzYdi+-94kFFbBk+briOAm7s2OXpdu
+At+eeUxAhPUl8K87Dihj1ca_z-aK7wtWm_kP0y4xewt
+ISOWbQnQ9zmXmjRSpd6b1YGSdIH7/FX4q2dZSvgaUtv
+M7PI81by1P7N_O3cXaaVQZPf/-/+-TKNSYuuxWLrM++
+oxyTKzWBhT3k6_DXdk8w/vdQqoNADs33+1uofd1ag85
+8ZM5IvDhvUe3oyorBcLNVGn8jHkeV1ugcw7YLkkrsOh
+IUABjgWWScWKL61QX6SL1ZInpgTraKhUlsnRwftK51w
+AjqTGzWp1NU_c3osnj5UiMqoSjyr+cWS1zRkPraXZia
+cVjuho2jDb52OThxF-x-hU4g/_f3UfcbnOjW4rV8/8B
+YY5ual0Zjw2LQRl3cMkqbXVRD/ccj8N1nKypZY+chbh
+_uDVjd009Xph0iNy5jFbZu-G+r9_VTWtd8bn/WmhHa1
+oq45d7S6pe_Ow7WPz95_/ceoLpl7eTyTl-B+ukcaDzZ
+wfK8MdOj8TVV7URziByBOKeaAF6q-gSJisvJqur2bhc
+sAciFmeJz9eN-Tp9VXb4TVar_9Gb/72uGa/RVrh_IQu
+8Gd2ZYvnhuZS9sPs3zZ_QRAIPIixf9un046KTDzfA+L
+sZVwZ1WkJOb4o9uhLjAx58cMZ5VNggXTrDaywWuNwx2
+I4PPy59X8GiVHnU_a_saMvGWbqPMOiHpRwtY5kadUPF
+8cnQt_79-/l4G5I3UQs0eRUyoGB6rdSXlJe-ZLqiaj+
+MNojovs4bjD+_O0ReYV8B3tXWet/gGO9Vmv/h9TRI1M
+_6Apj84DodnhHXzs23taUK1Q5Xg4fNyhmsu00eKk0T3
+Qm0g/vv0pGZKaOXOkNL73o4/-lMW3xVwFRDh9px8WRU
+MXzDZsAazbswbZQrBO8dGk_8+Ox-85rwOi_akbXkytd
+Y95QY2ADl-Ma1JhiOO0xAW-iXXifoydMji4MIXdD6_q
+4WKyk6O_+-I5m_HIlmz_sWs5TS6rivrirGt/SmQreXh
+A/51-ZUiV5Rr-XXFWWmQVunUYp2FI26GWa5goTBnufo
+0-mzzX-WGHYXJ1Jzu1ZViOR/Z6coGsGIG+1RscRuy2j
+0LrHb8yls--qBcHxx6In3-nT7-0zDJYHtRZ8yQbYms4
+IuuPZrbgKeL+k6lHIBep7njjinpKa_Of-yuDoGAb8f0
+kXt8cBp/yuR+/000Y3McIOXuMV4/F73ODpsYFtBi96i
+YjluSk8L5xvmivpWb-LR2YHt_8dSh8M3TB7ps-UIh6Q
+YZH5Zwm57hf3GZcSDZgwg-wthUzJpGImB1wRH97B2h1
+gD4JPXlJJ0NqSiG57+p/opBLBPj1wk51SV8NNQozPha
+snlwDu_2oZ1nJvV4SUzrjjNwnX_p0USQDFSAP7HviKZ
+454DgPfVhcb3pJpjLjxfAxtUHhngRGrvTYrzwM8m_1Y
+_k+mQ1N+HjeVRVVmHHy0IBs0bHsRbI_MLLJLKcjjZs4
+0sgM4yYBHYckscKzzgnkIQGVjXvS-5TeQ31YixBK1S1
+0D10/t/sx2ubSLesvfBpBHQ3IzANTKt36Gpza4gL175
+IvBGSaSNtyMb-dZMaKkbGAmuhMHMnTtctxgRjRORKy8
+cFDmohU81k2dQZRTh-WAhqU5KTfw2my0OdTI7v8sw2l
+U2Ny2Z2l8O6ydHHRc55wfksWP6K7wc0fagggW92zPYO
+4S4/i/2trkTDuaiZu6mMHDcxo+T/ixX08oSLRtqo/an
+I-Nygh527T+JZxrf3D1cciQtpttih6S59QB9w1_t02e
+IKu3_m5xI0ASe6efLJDOyHeKRf6NjnVVIi0/9FeOBeI
+gFcuLzU5jQwJBmAoUqDyTMO/7FO24dRLGbF4TsLgmKw
+```
+Now we just need to decode this data to get our flag.
+
+```python 
+import base64
+from Crypto.Cipher import AES
+from Crypto.Hash import SHA256
+
+def reverse_decode(encoded_data):
+    reversed_data = encoded_data[::-1]
+    replaced_data = reversed_data.replace('-', 'C').replace('_', 'E')
+    
+    padding = 4 - (len(replaced_data) % 4)
+    if padding < 4:
+        replaced_data += '=' * padding
+
+    return replaced_data 
+
+def aes_decrypt(encrypted_text, key):
+    key_hash = SHA256.new(key.encode('utf-8')).digest()
+
+    encrypted_bytes = base64.b64decode(encrypted_text)
+    
+    iv = encrypted_bytes[:16]
+    cipher_text = encrypted_bytes[16:]
+    
+    cipher = AES.new(key_hash, AES.MODE_CBC, iv)
+    
+    decrypted_bytes = cipher.decrypt(cipher_text)
+    
+    pad_len = decrypted_bytes[-1]
+    decrypted_bytes = decrypted_bytes[:-pad_len]
+
+    return decrypted_bytes.decode('utf-8')
+
+with open('./decoded_output.txt', 'r') as file:
+    lines = file.readlines()
+
+decoded_output = ''
+for line in lines:
+    line = line.strip()
+    if line: 
+        replaced_line = reverse_decode(line)
+        plain = aes_decrypt(replaced_line,"YaMfem0zr4jdiZsDUxv1TH69")
+        decoded_output += plain
+
+print(decoded_output)
+```
+```powershell
+python .\FinalDecryptttt.py
+ASCIS{N0th1n9_1$_m0r3_pr3c10u5_7h4n_1ndEp3ndenc3_&_fr33d0m}
+```
+
+> ASCIS{N0th1n9_1$_m0r3_pr3c10u5_7h4n_1ndEp3ndenc3_&_fr33d0m}
+{: .prompt-info }
