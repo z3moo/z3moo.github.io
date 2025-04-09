@@ -552,7 +552,7 @@ function SendResults {
 - `$XoX` is then sent to the server
 
 That was tiresome ~~. We got the `.pcapng` file tho, this could help us to get the data we need.
-#### Encryped data package ($XoX)
+#### $encrypedDataPackage ($XoX)
 
 Luckily the data was right at the beginning.
 
@@ -577,10 +577,10 @@ Date: Wed, 18 Sep 2024 17:09:37 GMT
 The endpoint was `/data` and sent with `HTTP POST`. Thus we could see our first clue.
 
 ```
-$XoX = 0IzL5AzL5_DItASOwoDMwAiPgQmb2ZWMiBHZ18Gat4Wa3BiPgI3b0Fmc0NXaulWbkFGI+AiWsZ_TkRFaupFVaNjYqZ_akpnV0RmbWVnWy40VTJjSRJ2X1cFZHZVUlhlTtQmbOBFTxQWWShFawV1V5MVUtp0STRkWxFlaORkTHZkRWRUV4ZlVOp0VnBiP
+$encrypedDataPackage = 0IzL5AzL5_DItASOwoDMwAiPgQmb2ZWMiBHZ18Gat4Wa3BiPgI3b0Fmc0NXaulWbkFGI+AiWsZ_TkRFaupFVaNjYqZ_akpnV0RmbWVnWy40VTJjSRJ2X1cFZHZVUlhlTtQmbOBFTxQWWShFawV1V5MVUtp0STRkWxFlaORkTHZkRWRUV4ZlVOp0VnBiP
 ```
 
-#### Combined metadata strings ($2YngY)
+#### $combinedMetadata ($2YngY)
 We got `$XoX` and `$2YngY` was encrypted with bas64 to get `$XoX`.
 
 We could write a script to decode `$XoX` to get the data we need.
@@ -599,7 +599,7 @@ def reverse_decode(strings):
     decoded = base64.b64decode(replaced_strings)
     return decoded
 
-XoX = "0IzL5AzL5_DItASOwoDMwAiPgQmb2ZWMiBHZ18Gat4Wa3BiPgI3b0Fmc0NXaulWbkFGI+AiWsZ_TkRFaupFVaNjYqZ_akpnV0RmbWVnWy40VTJjSRJ2X1cFZHZVUlhlTtQmbOBFTxQWWShFawV1V5MVUtp0STRkWxFlaORkTHZkRWRUV4ZlVOp0VnBiP"
+encrypedDataPackage = "0IzL5AzL5_DItASOwoDMwAiPgQmb2ZWMiBHZ18Gat4Wa3BiPgI3b0Fmc0NXaulWbkFGI+AiWsZ_TkRFaupFVaNjYqZ_akpnV0RmbWVnWy40VTJjSRJ2X1cFZHZVUlhlTtQmbOBFTxQWWShFawV1V5MVUtp0STRkWxFlaORkTHZkRWRUV4ZlVOp0VnBiP"
 decoded = reverse_decode(XoX)
 print(decoded.decode('utf-8', errors='ignore'))
 ```
@@ -607,47 +607,48 @@ print(decoded.decode('utf-8', errors='ignore'))
 python .\B64Reverse.py
 > gWJNVVxUDVFFGNDNjQqZDSKJmQS9WUphXRYd1LPNnd-NXeQVGdW5_bQJ2SWN2ZuVndtVzdhFjb3ZTZnhTdLFlZ > administrator > win-ho5dpb1fvnd > 00:09 - 19/09/24
 ```
-Remember ` $2YngY = "> $cVl > $OgE > $zVSza > $7VEq"` thus we could see that:
-- `$cVl`: gWJNVVxUDVFFGNDNjQqZDSKJmQS9WUphXRYd1LPNnd-NXeQVGdW5_bQJ2SWN2ZuVndtVzdhFjb3ZTZnhTdLFlZ
-- `$OgE`: administrator
-- `$zVSza`: win-ho5dpb1fvnd
-- `$7VEq`: 00:09 - 19/09/24
+Remember ` $combinedMetadata = "> $encodedAesKey > $machineName > $username > $formattedDateTime"` thus we could see that:
+- `$encodedAesKey`: gWJNVVxUDVFFGNDNjQqZDSKJmQS9WUphXRYd1LPNnd-NXeQVGdW5_bQJ2SWN2ZuVndtVzdhFjb3ZTZnhTdLFlZ
+- `$machineName`: administrator
+- `$username`: win-ho5dpb1fvnd
+- `$formattedDateTime`: 00:09 - 19/09/24
 
-#### Encoded AES strings ($cvf)
-And `$cVl` also base64 encoded from `$cvf`. Reuse the script to get what we need.
+#### $encryptedAesKey ($cvf)
+And `$encodedAesKey` also base64 encoded from `$encryptedAesKey`. Reuse the script to get what we need.
 ```powershell
 python -u "e:\CTF\UrgentTina SVATTT\B64Reverse.py"
 fQKu8ge6wn1aw5mvungcVKbPlNVtePysBvsO/WXExiQoRBbJH6jB3C4aET51USIZ
 ```
-`$cvf` was the result of the AES encryption. We need to find the key which was `$Uz19o`
-#### Derived AES key from date time ($Uz19o)
+`$encryptedAesKey` was the result of the AES encryption. We need to find the key which was `$derivedKeyFromDateTime`
+
+#### $derivedKeyFromDateTime ($Uz19o)
 `Ctrl` + `F` with `$Uz19o` give us where we could get the value for this variable.
 ```powershell
 $OgE = ([Environment]::MachineName).ToLower() ; $zVSza = ([Environment]::UserName).ToLower() ; $I26 = "yaginote.txt"
 $7VEq = Get-Date -Format "HH:mm - dd/MM/yy" ; $Uz19o = $7VEq.replace(":","").replace(" ","").replace("-","").replace("/","")+$zVSza+$OgE
 ```
-`$Uz19o` was created from `$7VEq`, `$zVSza` and `$OgE`.
-- `$7VEq`: Date and time when the script was executed (found earlier ` 00:09 - 19/09/24` )
-- `$zVSza`: Machine name (found earlier `win-ho5dpb1fvnd`)
-- `$OgE`: User name (found earlier `administrator`)
+`$derivedKeyFromDateTime` was created from `$formattedDateTime`, `$username` and `$machineName`.
+- `$formattedDateTime`: Date and time when the script was executed (found earlier ` 00:09 - 19/09/24` )
+- `$username`: Machine name (found earlier `win-ho5dpb1fvnd`)
+- `$machineName`: User name (found earlier `administrator`)
 
-We got everything now let's find `$Uz19o`
+We got everything now let's find `$derivedKeyFromDateTime`
 ```python
 date_time = "00:09 - 19/09/24" # $7VEq
 username = "win-ho5dpb1fvnd"  # $zVSza
 machine_name = "administrator"  # $OgE
 
 formatted_date = date_time.replace(":", "").replace(" ", "").replace("-", "").replace("/", "")
-uz19o = formatted_date + username + machine_name
+derivedKeyFromDateTime = formatted_date + username + machine_name
 
-print(uz19o)
+print(derivedKeyFromDateTime)
 ```
 ```powershell
 python -u "e:\CTF\UrgentTina SVATTT\Uz.py"
 0009190924win-ho5dpb1fvndadministrator
 ```
-#### Master AES key ($WiETm)
-We got all the data to find `$WiETm` now.
+#### $masterEncryptionKey ($WiETm)
+We got all the data to find `$masterEncryptionKey` now.
 
 ```python
 from Crypto.Hash import SHA256
@@ -668,16 +669,16 @@ def decrypt_aes(ciphertext, key):
     decrypted = decrypted.rstrip(b"\0")
     return decrypted.decode('utf-8')
 
-cvf = "fQKu8ge6wn1aw5mvungcVKbPlNVtePysBvsO/WXExiQoRBbJH6jB3C4aET51USIZ" 
-Uz19o = "0009190924win-ho5dpb1fvndadministrator" 
-WiETm = decrypt_aes(cvf, Uz19o) 
-print(WiETm)
+encryptedAesKey = "fQKu8ge6wn1aw5mvungcVKbPlNVtePysBvsO/WXExiQoRBbJH6jB3C4aET51USIZ" 
+derivedKeyFromDateTime = "0009190924win-ho5dpb1fvndadministrator" 
+masterEncryptionKey = decrypt_aes(encryptedAesKey, derivedKeyFromDateTime) 
+print(masterEncryptionKey)
 ```
 ```powershell
 python -u "e:\CTF\UrgentTina SVATTT\AESDecrypt.py"
 YaMfem0zr4jdiZsDUxv1TH69
 ```
-Finally we got `$WiETm: YaMfem0zr4jdiZsDUxv1TH69` now
+Finally we got `$masterEncryptionKey: YaMfem0zr4jdiZsDUxv1TH69` now
 
 #### Logs 
 
@@ -800,7 +801,7 @@ ExfiltrateFiles ; sleep 1 }}
  else { SendOK }
 sleep 1000 ; Write-Host "[i] Done!" -ForegroundColor Green ; Write-Host
 ```
-The `EncryptFiles` and `ExfiltrateFiles` processes, in short, encrypt all files in a folder (file exclusions are defined within the functions) using AES encryption with the key `$WiETm` and then encrypt the data again using `R64Encoder`
+The `EncryptFiles` and `ExfiltrateFiles` processes, in short, encrypt all files in a folder (file exclusions are defined within the functions) using AES encryption with the key `$masterEncryptionKey` and then encrypt the data again using `R64Encoder`
 
 
 Looking at the HTTP stream we could see the process too. 
