@@ -1,5 +1,12 @@
 theme: jekyll-theme-chirpy
 
+# Plugin settings
+plugins:
+  - jekyll-paginate
+  - jekyll-seo-tag
+  - jekyll-archives
+  - jekyll-sitemap
+
 lang: en
 
 timezone: Asia/Bangkok
@@ -45,7 +52,7 @@ webmaster_verifications:
 # Web Analytics Settings
 analytics:
   google:
-    id: # fill in your Google Analytics ID
+    id: G-VG28544J70
   goatcounter:
     id: # fill in your GoatCounter ID
   umami:
