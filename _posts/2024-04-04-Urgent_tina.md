@@ -1026,6 +1026,15 @@ _Diagnostic analysis_
 
 We won't find the `update.ps1` here; that's where we return to the `strings` method.
 
+Another way was using `DetectItEasy` to analyze the memdump, with the following results.
+
+![alt text](../assets/img/UrgentTina/2025-04-09_15-36.png)
+_DiE results_
+
+As we can see, this was a Windows Minidump containing PowerShell script code, which is why we needed to use the `strings` method to extract the script.
+
+> Till this point I know that the memdump wasn't corrupted but rather a minidump.
+
 ## Thoughts on the challenge
 
 This was a pretty fun challenge. Finding the PowerShell script was particularly challenging from the get-go since we didn't know what we were looking for.
