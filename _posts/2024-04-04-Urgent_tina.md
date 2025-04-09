@@ -10,8 +10,8 @@ Our client is a pessimist, she is worried that if she does not pay the ransom in
 
 Author: bquanman
 
-> ASCIS{N0th1n9_1$_m0r3_pr3c10u5_7h4n_1ndEp3ndenc3_&_fr33d0m}
-{: .prompt-info }
+`ASCIS{N0th1n9_1$_m0r3_pr3c10u5_7h4n_1ndEp3ndenc3_&_fr33d0m}`
+
 
 ## Thought process
 ### File inspection
@@ -62,6 +62,8 @@ Hmm, the memory dump seems to be corrupted. Let's see if there's any workaround.
 
 -> After trying some popular functions, I concluded that the memory dump was corrupted.
 
+> At this point I didn't know the memdump was a mini-dump so I concluded it was corrupted but in fact it wasn't
+
 Let's try something like `strings` and output to a file to see the memory dump content.
 
 ![Memory dump content](../assets/img/UrgentTina/2025-04-05_01-58.png)
@@ -81,9 +83,6 @@ This is fascinating. A program called `update.exe` was executed in the user's `D
 {: .prompt-info }
 > -x: Unknown 
 {: .prompt-info }
-And PowerShell module was called -> This suggests the executed program could have used PowerShell to run a script.
-
-So now we must find the PowerShell script executed within the memory dump.
 
 ![alt text](../assets/img/UrgentTina/2025-04-05_02-16.png)
 _Strings Content (Powershell code block)_
@@ -553,7 +552,7 @@ function SendResults {
 - `$XoX` is then sent to the server
 
 That was tiresome ~~. We got the `.pcapng` file tho, this could help us to get the data we need.
-#### $XoX
+#### Encryped data package ($XoX)
 
 Luckily the data was right at the beginning.
 
@@ -581,7 +580,7 @@ The endpoint was `/data` and sent with `HTTP POST`. Thus we could see our first 
 $XoX = 0IzL5AzL5_DItASOwoDMwAiPgQmb2ZWMiBHZ18Gat4Wa3BiPgI3b0Fmc0NXaulWbkFGI+AiWsZ_TkRFaupFVaNjYqZ_akpnV0RmbWVnWy40VTJjSRJ2X1cFZHZVUlhlTtQmbOBFTxQWWShFawV1V5MVUtp0STRkWxFlaORkTHZkRWRUV4ZlVOp0VnBiP
 ```
 
-#### $2YngY
+#### Combined metadata strings ($2YngY)
 We got `$XoX` and `$2YngY` was encrypted with bas64 to get `$XoX`.
 
 We could write a script to decode `$XoX` to get the data we need.
@@ -614,14 +613,14 @@ Remember ` $2YngY = "> $cVl > $OgE > $zVSza > $7VEq"` thus we could see that:
 - `$zVSza`: win-ho5dpb1fvnd
 - `$7VEq`: 00:09 - 19/09/24
 
-#### $cvf
+#### Encoded AES strings ($cvf)
 And `$cVl` also base64 encoded from `$cvf`. Reuse the script to get what we need.
 ```powershell
 python -u "e:\CTF\UrgentTina SVATTT\B64Reverse.py"
 fQKu8ge6wn1aw5mvungcVKbPlNVtePysBvsO/WXExiQoRBbJH6jB3C4aET51USIZ
 ```
 `$cvf` was the result of the AES encryption. We need to find the key which was `$Uz19o`
-#### $Uz19o
+#### Derived AES key from date time ($Uz19o)
 `Ctrl` + `F` with `$Uz19o` give us where we could get the value for this variable.
 ```powershell
 $OgE = ([Environment]::MachineName).ToLower() ; $zVSza = ([Environment]::UserName).ToLower() ; $I26 = "yaginote.txt"
@@ -647,7 +646,7 @@ print(uz19o)
 python -u "e:\CTF\UrgentTina SVATTT\Uz.py"
 0009190924win-ho5dpb1fvndadministrator
 ```
-#### $WiETm
+#### Master AES key ($WiETm)
 We got all the data to find `$WiETm` now.
 
 ```python
