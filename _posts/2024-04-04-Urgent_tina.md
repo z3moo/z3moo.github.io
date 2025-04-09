@@ -62,7 +62,7 @@ Hmm, the memory dump seems to be corrupted. Let's see if there's any workaround.
 
 -> After trying some popular functions, I concluded that the memory dump was corrupted.
 
-> At this point I didn't know the memdump was a mini-dump so I concluded it was corrupted but in fact it wasn't
+> At this point, I didn't know the memory dump was a mini-dump, so I incorrectly concluded it was corrupted when in fact it wasn't.
 
 Let's try something like `strings` and output to a file to see the memory dump content.
 
