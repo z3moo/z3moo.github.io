@@ -25,12 +25,12 @@ _Files given_
 
 Opening the `.pcapng` file.
 
-![Opened .pcapng file](<../../../assets/images/urgent-tina/2025-04-05_00-25.png)
+![Opened .pcapng file](<../../../assets/images/urgent-tina/2025-04-05_00-25.png>)
 _Opened file_
 
 Let's follow the TCP stream to check what was going on.
 
-![TCP stream](<../../../assets/images/urgent-tina/2025-04-05_00-28.png)
+![TCP stream](<../../../assets/images/urgent-tina/2025-04-05_00-28.png>)
 _TCP stream_
 
 It seems to be encoded. We were given not only the `.pcapng` file but also a `.DMP` - a memory dump - maybe the encoding algorithm was in the memory dump. So let's leave the `.pcapng` there for now and inspect the memory dump.
@@ -67,7 +67,7 @@ Hmm, the memory dump seems to be corrupted. Let's see if there's any workaround.
 
 Let's try something like `strings` and output to a file to see the memory dump content.
 
-![Memory dump content](<../../../assets/images/urgent-tina/2025-04-05_01-58.png)
+![Memory dump content](<../../../assets/images/urgent-tina/2025-04-05_01-58.png>)
 _Strings Content_
 
 This is fascinating. A program called `update.exe` was executed in the user's `Desktop`.
@@ -77,15 +77,15 @@ This is fascinating. A program called `update.exe` was executed in the user's `D
 ```
 
 > -e c:\users\ieuser\documents\: Best guess is the program extracts the data to the `Documents` folder of the user
-{: .prompt-info }
-> -s 192.168.240.1: Maybe sends the data to a server at 192.168.240.1
-{: .prompt-info }
-> -p 443: Uses port 443
-{: .prompt-info }
-> -x: Unknown 
-{: .prompt-info }
 
-![alt text](<../../../assets/images/urgent-tina/2025-04-05_02-16.png)
+> -s 192.168.240.1: Maybe sends the data to a server at 192.168.240.1
+
+> -p 443: Uses port 443
+
+> -x: Unknown 
+
+
+![alt text](<../../../assets/images/urgent-tina/2025-04-05_02-16.png>)
 _Strings Content (Powershell code block)_
 A PowerShell sciprt block was found right below the place we found where the program was executed. The script is pretty long.
 
@@ -557,7 +557,7 @@ That was tiresome ~~. We got the `.pcapng` file tho, this could help us to get t
 
 Luckily the data was right at the beginning.
 
-![alt text](<../../../assets/images/urgent-tina/2025-04-07_21-03.png)
+![alt text](<../../../assets/images/urgent-tina/2025-04-07_21-03.png>)
 _HTTP Stream_
 
 ```http
@@ -685,7 +685,7 @@ Finally we got `$masterEncryptionKey: YaMfem0zr4jdiZsDUxv1TH69` now
 
 We only need to decrypt the logs that were sent to endpoint $7CiB:$UFX/logs
 
-![alt text](<../../../assets/images/urgent-tina/2025-04-08_01-06.png)
+![alt text](<../../../assets/images/urgent-tina/2025-04-08_01-06.png>)
 _HTTP Stream_
 
 ```http
@@ -699,7 +699,7 @@ kVGdwlncj5WZgc3buBycpByZwpmLy_TYykjN4_jYjNWO1YTM3cjNmJmZxgjMmFWZycjN5Y2X1cTO4YDO
 ```
 The logs were encrypted with R64Encoder so we'll reuse the script we used before.
 
-![alt text](<../../../assets/images/urgent-tina/2025-04-08_01-16.png)
+![alt text](<../../../assets/images/urgent-tina/2025-04-08_01-16.png>)
 
 It's a bit hard to read, so we can modify the script a bit.
 
@@ -807,7 +807,7 @@ The `EncryptFiles` and `ExfiltrateFiles` processes, in short, encrypt all files 
 
 Looking at the HTTP stream we could see the process too. 
 
-![alt text](<../../../assets/images/urgent-tina/2025-04-08_01-47.png)
+![alt text](<../../../assets/images/urgent-tina/2025-04-08_01-47.png>)
 
 After decoding the file names, we can determine where to start: at `/files/j5WZuQHe05-Mx81ZhxmZ` since it's `flag_1.txt`.
 
@@ -1012,24 +1012,24 @@ When analyzing the memdump, I used the 'strings' command to capture the PowerShe
 
 We could load the memdump into Visual Studio to check the memdump modules:
 
-![alt text](<../../../assets/images/urgent-tina/2025-04-08_22-13.png)
+![alt text](<../../../assets/images/urgent-tina/2025-04-08_22-13.png>)
 _update.DMP in Visual Studio_
 
 We could see the process name as well as the modules that were loaded. After some searching, we could determine that the program was executing a PowerShell script.
 
-![alt text](<../../../assets/images/urgent-tina/2025-04-09_00-45.png)
+![alt text](<../../../assets/images/urgent-tina/2025-04-09_00-45.png>)
 _PowerShell related modules_
 
 Running diagnostic analysis, we could confirm that the program used PowerShell:
 
-![alt text](<../../../assets/images/urgent-tina/2025-04-09_01-42.png)
+![alt text](<../../../assets/images/urgent-tina/2025-04-09_01-42.png>)
 _Diagnostic analysis_
 
 We won't find the `update.ps1` here; that's where we return to the `strings` method.
 
 Another way was using `DetectItEasy` to analyze the memdump, with the following results.
 
-![alt text](<../../../assets/images/urgent-tina/2025-04-09_15-36.png)
+![alt text](<../../../assets/images/urgent-tina/2025-04-09_15-36.png>)
 _DiE results_
 
 As we can see, this was a Windows Minidump containing PowerShell script code, which is why we needed to use the `strings` method to extract the script.
