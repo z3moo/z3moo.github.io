@@ -1,0 +1,69 @@
+---
+import BlogCard from '@/components/BlogCard.astro'
+import Container from '@/components/Container.astro'
+import Link from '@/components/Link.astro'
+import { buttonVariants } from '@/components/ui/button'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { SITE } from '@/consts'
+import Layout from '@/layouts/Layout.astro'
+import { getCollection } from 'astro:content'
+
+const blog = (await getCollection('blog'))
+  .filter((post) => !post.data.draft)
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+  .slice(0, SITE.NUM_POSTS_ON_HOMEPAGE)
+---
+
+<Layout title="Home" description={SITE.DESCRIPTION}>
+  <Container class="flex flex-col gap-y-6">
+    <section>
+      <Card className="bg-transparent">
+        <CardHeader className="pb-4">
+          <h1 class="text-2xl font-semibold tracking-tight">Hey, I'm Emile.</h1>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <p class="text-sm text-primary">
+            I’m a software engineer who enjoys designing and building useful
+            things for the web. Currently, I’m focused on creating SaaS
+            products, websites, brands, directories, and whatever else I find
+            interesting at{' '}
+            <Link
+              href="https://rennalabs.xyz/"
+              class="text-foreground"
+              external
+              underline>Renna Labs</Link
+            >.
+          </p>
+          <p class="text-sm text-primary">
+            This is my small corner of the web — a hypertext garden where I
+            share thoughts on software, life, and whatever else drifts through
+            my stream of consciousness.
+          </p>
+        </CardContent>
+      </Card>
+    </section>
+    <section class="flex flex-col gap-y-4">
+      <h2 class="text-2xl font-bold">Latest posts</h2>
+      <ul class="not-prose flex flex-col gap-y-4">
+        {
+          blog.map((post) => (
+            <li>
+              <BlogCard entry={post} />
+            </li>
+          ))
+        }
+      </ul>
+      <div class="flex justify-center">
+        <Link
+          href="/blog"
+          class={buttonVariants({ variant: 'ghost' }) + ' group'}
+        >
+          See all posts <span
+            class="ml-1.5 transition-transform group-hover:translate-x-1"
+            >&rarr;</span
+          >
+        </Link>
+      </div>
+    </section>
+  </Container>
+</Layout>

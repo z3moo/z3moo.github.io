@@ -1,0 +1,133 @@
+---
+title: 'The Correct Way to Load Google AdSense in Next.js'
+description: "You'll lose ad revenue unless you load AdSense in Next.js the right way."
+date: 2025-04-02
+tags: ['nextjs', 'code']
+image: './adsense-next.webp'
+---
+
+Adding Google Adsense to a Next.js site is fairly straightforward and simple. You can install <a href="https://github.com/scttcper/react-adsense" rel="noreferrer nofollow" target="_blank">@ctrl/react-adsense</a>, use the component with your credentials, and add the Adsense script to `pages/_app.js` if you're using Page Router or `app/layout.tsx` for App Router.
+
+At first glance, this might seem like all you need, but I found out the hard way that this basic implementation is not enough to get the job done. Read on if you're interested why, otherwise <a href="#the-solution">skip to the solution</a>.
+
+```javascript title="pages/_app.tsx" caption="Loading the script in Next with page router"
+import Script from 'next/script'
+
+// This part was ok ✅
+export default function App({ Component, pageProps }) {
+  return (
+    <>
+      <Script
+        strategy="afterInteractive"
+        src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXX"
+        crossOrigin="anonymous"
+      />
+      <Component {...pageProps} />
+    </>
+  )
+}
+```
+
+```javascript title="AdBanner.tsx" caption="Minimal react-adsense setup"
+import React from 'react'
+import { Adsense } from '@ctrl/react-adsense'
+
+// This part was not ❌
+export function AdBanner() {
+  return <Adsense client="ca-pub-XXXXXXXXXXXXXXXX" slot="XXXXXXXXXX" />
+}
+```
+
+## The Problem
+
+After running this setup for about four months on a site averaging around 30,000 pageviews per month, I started noticing something odd. My daily ad revenue seemed unusually low, but I initially chalked it up to typical Adsense RPMs. It's well-known that Adsense doesn’t pay as well as some other ad networks, but given their low barrier to entry, I accepted it as part of the tradeoff.
+
+What didn’t add up was that my analytics dashboard was showing more than twice the pageviews reported by Google Adsense. It didn’t take long to realize that the root cause was likely related to how Next.js handles routing and rendering.
+
+Next.js is a single-page application (SPA) framework under the hood, even when using traditional routing patterns. This means that when users navigate between pages, the browser doesn’t fully reload the page, it simply swaps out content dynamically. While this is great for performance and user experience, it introduces a subtle problem: scripts like Google AdSense are designed to detect full page loads, not internal client-side navigations. As a result, while users were technically viewing multiple pages per session, AdSense wasn’t registering those views because it only initialized once on mount. Without a proper fix, every client-side page change was effectively invisible to the ad system.
+
+The site I was working on, <a href="https://gig.fish" rel="noreferrer" target="_blank">GigFish</a>, is a directory where users typically spend 5 minutes or more per session, browsing an average of 5 or more pages. Because my AdBanner component was only rendering once on a route like <a href="https://gig.fish/discover" rel="noreferrer" target="_blank">the discover page</a>, I was missing out on several page views per user session.
+
+On subsequent navigations, the ad banner kept displaying the same ad because the component never re-rendered.
+
+## The Solution
+
+To fix the issue, I replaced the `@ctrl/react-adsense` component with my own implementation. It’s almost identical but adds a key based on the router path and a retry mechanism to ensure the ad banner is filled if the initial load fails.
+
+```javascript title="Adsense.tsx" caption="Filling new ads when the route changes"
+import React from 'react'
+import { useEffect } from 'react'
+import { useRouter } from 'next/router'
+import { cn } from '@/lib/utils'
+
+export function Adsense({
+  className = '',
+  style = { display: 'block' },
+  client,
+  slot,
+  layout = '',
+  layoutKey = '',
+  format = 'auto',
+  responsive = 'false',
+  pageLevelAds = false,
+  adTest,
+  children,
+  ...rest
+}) {
+  const router = useRouter()
+
+  useEffect(() => {
+    const p = {}
+    if (pageLevelAds) {
+      p.google_ad_client = client
+      p.enable_page_level_ads = true
+    }
+
+    // Fill the space with an ad
+    const doPush = () => {
+      if (typeof window !== 'object') return
+      window.adsbygoogle = window.adsbygoogle || []
+      window.adsbygoogle.push(p)
+    }
+
+    const pushAds = () => {
+      try {
+        doPush()
+      } catch {
+        // 👇 THIS IS A FAILSAFE
+        setTimeout(() => {
+          try {
+            doPush()
+          } catch (err) {
+            console.error('AdSense push retry failed:', err)
+          }
+        }, 750)
+      }
+    }
+
+    pushAds()
+  }, [router.asPath, client, slot, pageLevelAds])
+
+  return (
+    <ins
+      key={router.asPath} // 👈 THIS IS THE IMPORTANT FIX
+      className={cn('adsbygoogle', className)}
+      style={style}
+      data-ad-client={client}
+      data-ad-slot={slot}
+      data-ad-layout={layout}
+      data-ad-layout-key={layoutKey}
+      data-ad-format={format}
+      data-full-width-responsive={responsive}
+      data-adtest={adTest}
+      {...rest}
+    >
+      {children}
+    </ins>
+  )
+}
+```
+
+The `router.asPath` key signals to React that the component has changed and needs to be re-rendered. Inside the effect, logic attempts to populate the banner with a new ad. If the first attempt fails, which can happen due to the asynchronous loading of the Adsense script, it retries after 750ms. If, after all this, the ad still has the `data-ad-status="unfilled"` attribute, it's likely because the Google Adsense script chose not to serve an ad.
+
+After making this change, my AdBanner component correctly re-rendered whenever the URL's query parameters changed, and I started seeing different ads when navigating between pages. As a result, the pageview count in my Adsense reports began to align much more closely with the numbers from my analytics dashboard. While it's still a bit early to be certain, my daily ad revenue now looks likely to double in the coming months. 🥳
