@@ -352,7 +352,7 @@ sleep 1000 ; Write-Host "[i] Done!" -ForegroundColor Green ; Write-Host
 > 3. Send the results, logs to the C2 and exfiltrate `.enc` files.
 > 4. Create a ransom `readme` note and display a GUI popup with `Pay Now!` button
 > 5. Notify the C2 either `OK`, `Close` or `Pay Flags`
-{: .prompt-tip}
+
 
 Let's analyze each function more carefully
 #### AESEncryption
@@ -894,7 +894,7 @@ with open(output_file, "w", encoding="utf-8") as f:
 
 ```
 This script decodes all URLs and payloads from HTTP POST requests in the `.pcapng` file. It specifically extracts and decodes data related to flag files, then sorts them by number and saves the results to `output.txt`. Thanks ChatGPT
-```
+```text
 0NaXoN6fZexANHcU0Q+PtJtipYzI1MWcVGsKGQGi4v/
 Iz8pc9b88c1mOQHmc1hH5+xRDVFsPzL___qz1F-L724
 IAjJSPH1fgXSn659HaDJu9Tdob60WIocHOc1Kfa-IkY
@@ -1051,6 +1051,6 @@ Based on the `MITRE ATT&CK Framework`, the following techniques were used in thi
 The malware avoids encrypting OS files, uses AES with randomized keys for the encryption process. Exfiltration is HTTP-based with a combination of base64, AES, and ZIP encoding.
 
 > Thanks to the `.pcapng` file, we were able to solve this challenge. This highlights the importance of enabling DNS, HTTP, and command-line logging (through tools like Sysmon, Windows Defender ATP, etc.).
-{: .prompt-tip}
+
 
 That's all for this challenge :33 Peaceeeeee
