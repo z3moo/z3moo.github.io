@@ -1,8 +1,5 @@
 
-import __ASTRO_IMAGE_IMPORT_1TclI3 from "../../../public/static/rennalabs.png?astroContentImageFlag=&importer=src%2Fcontent%2Fprojects%2Frennalabs.md";
-import __ASTRO_IMAGE_IMPORT_ZkR7dv from "../../../public/static/gigfish.png?astroContentImageFlag=&importer=src%2Fcontent%2Fprojects%2Fgigfish.md";
-import __ASTRO_IMAGE_IMPORT_1uig0z from "../../../public/static/catcafemap.png?astroContentImageFlag=&importer=src%2Fcontent%2Fprojects%2Fcatcafemap.md";
 import __ASTRO_IMAGE_IMPORT_Z2qROn8 from "../../../assets/images/urgent-tina/Files Given.png?astroContentImageFlag=&importer=src%2Fcontent%2Fblog%2Fascis-2024-urgent-tina-writeup%2Findex.md";
 import __ASTRO_IMAGE_IMPORT_Z1WEVNb from "./banner.jpg?astroContentImageFlag=&importer=src%2Fcontent%2Fblog%2Fascis-2024-urgent-tina-writeup%2Findex.md";
-export default new Map([["../../../public/static/rennalabs.png?astroContentImageFlag=&importer=src%2Fcontent%2Fprojects%2Frennalabs.md", __ASTRO_IMAGE_IMPORT_1TclI3], ["../../../public/static/gigfish.png?astroContentImageFlag=&importer=src%2Fcontent%2Fprojects%2Fgigfish.md", __ASTRO_IMAGE_IMPORT_ZkR7dv], ["../../../public/static/catcafemap.png?astroContentImageFlag=&importer=src%2Fcontent%2Fprojects%2Fcatcafemap.md", __ASTRO_IMAGE_IMPORT_1uig0z], ["../../../assets/images/urgent-tina/Files Given.png?astroContentImageFlag=&importer=src%2Fcontent%2Fblog%2Fascis-2024-urgent-tina-writeup%2Findex.md", __ASTRO_IMAGE_IMPORT_Z2qROn8], ["./banner.jpg?astroContentImageFlag=&importer=src%2Fcontent%2Fblog%2Fascis-2024-urgent-tina-writeup%2Findex.md", __ASTRO_IMAGE_IMPORT_Z1WEVNb]]);
+export default new Map([["../../../assets/images/urgent-tina/Files Given.png?astroContentImageFlag=&importer=src%2Fcontent%2Fblog%2Fascis-2024-urgent-tina-writeup%2Findex.md", __ASTRO_IMAGE_IMPORT_Z2qROn8], ["./banner.jpg?astroContentImageFlag=&importer=src%2Fcontent%2Fblog%2Fascis-2024-urgent-tina-writeup%2Findex.md", __ASTRO_IMAGE_IMPORT_Z1WEVNb]]);
 		
