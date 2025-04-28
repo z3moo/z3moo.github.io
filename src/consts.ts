@@ -13,10 +13,10 @@ export type Link = {
 }
 
 export const SITE: Site = {
-  TITLE: 'Emile Choghi',
+  TITLE: 'Atre1des',
   DESCRIPTION:
-    'Emile Choghi is a software engineer who specializes in building useful digital experiences.',
-  EMAIL: 'echoghi@rennalabs.xyz',
+    'A blog about my life, work, and the journey studying information security.',
+  EMAIL: 'danhquan2005@gmail.com',
   NUM_POSTS_ON_HOMEPAGE: 3,
   POSTS_PER_PAGE: 3,
   SITEURL: 'https://z3moo.github.io',
@@ -29,7 +29,7 @@ export const NAV_LINKS: Link[] = [
 ]
 
 export const SOCIAL_LINKS: Link[] = [
-  { href: 'https://github.com/echoghi', label: 'GitHub' },
-  { href: 'echoghi@rennalabs.xyz', label: 'Email' },
+  { href: 'https://github.com/z3moo', label: 'GitHub' },
+  { href: 'danhquan2005@gmail.com', label: 'Email' },
   { href: '/rss.xml', label: 'RSS' },
 ]
