@@ -13,7 +13,7 @@ Author: bquanman
 
 `ASCIS{N0th1n9_1$_m0r3_pr3c10u5_7h4n_1ndEp3ndenc3_&_fr33d0m}`
 
-[Challenge Files Here!](src/assets/files/urgent-tina/Urgent_Tina.zip)
+<a href="../../../assets/files/urgent-tina/Urgent_Tina.zip" download>Download Challenge Files</a>
 
 ## Thought process
 ### File inspection
