@@ -8,8 +8,7 @@ image: './banner.png'
 
 ## Forensics
 ### introduction2mem4
-
-:::info
+#### Challenge description
 digital forensics go br br
 
 bksec-ttv-2025-challenge1.zip
@@ -17,7 +16,7 @@ bksec-ttv-2025-challenge1.zip
 Password: BKSEC{c96e9c82629dc849a6913037b322874f93806cee572762b97e879626af9c7396}
 
 Author: teebow1e
-:::
+#### Thought pocess
 After unzipping the file we got a memory dump
 
 ![image](https://hackmd.io/_uploads/BJj-bRxskx.png)
@@ -30,9 +29,7 @@ Let's use `volatility3` to analyze the dump to get the answer.
 
 ![image](https://hackmd.io/_uploads/rJ6bfCgokg.png)
 
-:::success
-The answer is "10"
-:::
+`The answer is "10"`
 
 **Second Question:**
 
@@ -40,9 +37,7 @@ The answer is "10"
 
 Using the same `windows.info` function we could see the system time is "2025-02-20 15:05:26+00:00". This is GMT+0 so convert to Vietnam time which is GMT+7.
 
-:::success
-The answer is "2025-02-20 22:05:26"
-:::
+`The answer is "2025-02-20 22:05:26"`
 
 **Third Question:**
 
@@ -58,9 +53,7 @@ Upon inspecting the `pstree.txt`, we could see there are two suspicious file in 
 
 `svcost.exe/8144` and `flag2.exe/5228`, after trying both we got the answer
 
-:::success
-The answer is "svcost.exe/8144"
-:::
+`The answer is "svcost.exe/8144"`
 
 **Fourth Question:**
 
@@ -68,9 +61,7 @@ The answer is "svcost.exe/8144"
 
 Use the same `pstree.txt` to check `svcost.exe` PPID which is `wscript.exe/8268`
 
-:::success
-The answer is "wscript.exe/8268"
-:::
+`The answer is "wscript.exe/8268"`
 
 **Fifth Question:**
 
@@ -80,9 +71,7 @@ Still using the `pstree.txt` we gonna find a phrase that's gonna be our answer.
 
 ![image](https://hackmd.io/_uploads/H1MaIRgi1e.png)
 
-:::success
-The answer is "BKSEC{d0_n0t_p4sS_s3cr3TZ_0n_th3_cmDljn3}"
-:::
+`The answer is "BKSEC{d0_n0t_p4sS_s3cr3TZ_0n_th3_cmDljn3}"`
 
 **Sixth Question:**
 
@@ -96,9 +85,7 @@ Remember that `svcost.exe/8144` is our target. Opening `netscan.txt` we could fi
 
 ![image](https://hackmd.io/_uploads/r19twCxj1g.png)
 
-:::success
-The answer is "103.69.97.144:31337"
-:::
+`The answer is "103.69.97.144:31337"`
 
 **Final Question:**
 
@@ -132,23 +119,16 @@ Jackpot ! A flag1.txt ! But we can't dump the file ! Let's just use `strings` on
 
 Boom ! Combine the two and we got our final answer :3 
 
-:::success
-The answer is "BKSEC{l00k_ljk3_w3_h4v3_a_n3w_vol4tilitY_m4st3r_c0mjn9_in2_t0wn}"
-:::
-
-:::danger
-References: https://blog.onfvp.com/post/volatility-cheatsheet/
-:::
+`The answer is "BKSEC{l00k_ljk3_w3_h4v3_a_n3w_vol4tilitY_m4st3r_c0mjn9_in2_t0wn}"`
 
 ### The worst scenario
-:::info
+#### Challenge description
 bksec-ttv-2025-challenge2.zip
 
 pass: BKSEC{752484b9920b2b4b72e196690d925c32288832fe285990aa6bb4fa8276b0be41}
 
 Author: teobi
-:::
-
+#### Thought process
 Upon unzipping the file we got access.log (fat af) and SQLLog.log
 
 ![image](https://hackmd.io/_uploads/rJCwoCljye.png)
@@ -165,9 +145,7 @@ which will only count the line that has timestamp.
 
 ![image](https://hackmd.io/_uploads/Sk8K0Rgs1e.png)
 
-:::success
-The answer is "18397627"
-:::
+`The answer is "18397627"`
 
 **Second Question**
 
@@ -181,9 +159,7 @@ which will only take the first field seperated by a ' ' then sorted it in ascend
 
 ![image](https://hackmd.io/_uploads/rJQhkkZike.png)
 
-:::success
-The answer is "21-02-2023"
-:::
+`The answer is "21-02-2023"`
 
 **Third Question**
 
@@ -193,9 +169,8 @@ Open the access.log and we got the answer ( can't be more obvious, right ?)
 
 ![image](https://hackmd.io/_uploads/HJLQx1boyx.png)
 
-:::success
-The answer is "10.0.9.4"
-:::
+`The answer is "10.0.9.4"`
+
 **Fourth Question**
 
 ![image](https://hackmd.io/_uploads/H1pIlkWs1l.png)
@@ -204,9 +179,7 @@ Finally, we got to use SQLLog.log. Inspecting the file could see this line.
 
 ![image](https://hackmd.io/_uploads/S1YTl1bjJe.png)
 
-:::success
-The answer is "WIN-BSDM40BT0A0"
-:::
+`The answer is "WIN-BSDM40BT0A0"`
 
 **Fifth Question**
 
@@ -218,13 +191,9 @@ Hmm, tricky one.
 
 We could try something like this to check how many request are sent in access.log that have any kind of exploit ( or just try everything :D lol)
 
-:::danger
-Still not very sure if this is the author's thought on "the right track" :P 
-:::
+`Still not very sure if this is the author's thought on "the right track" :P `
 
-:::success
-The answer is "sql_injection"
-:::
+`The answer is "sql_injection"`
 
 **Sixth Question**
 
@@ -238,18 +207,15 @@ We could see the many of the request was sent to `/GetBookName.aspx`
 
 ![image](https://hackmd.io/_uploads/SJtREk-o1x.png)
 
-:::success
-The answer is "/GetBookName.aspx"
-:::
+`The answer is "/GetBookName.aspx"`
+
 **Seventh Question**
 
 ![image](https://hackmd.io/_uploads/H1-Mrkbi1e.png)
 
 Using the above image, we could see that the attacker is using `sql_map` and the `User-Agent` is also in there.
 
-:::success
-The answer is "sqlmap/1.7.2.16#dev+(https://sqlmap.org)"
-:::
+`The answer is "sqlmap/1.7.2.16#dev+(https://sqlmap.org)"`
 
 **Eight Question**
 
@@ -267,9 +233,8 @@ https://attack.mitre.org/techniques/T1505/001/
 
 Thus giving us the ID
 
-:::success
-The answer is "T1505.001"
-:::
+`The answer is "T1505.001"`
+
 **Ninth Question**
 
 ![image](https://hackmd.io/_uploads/HkjQPy-jkl.png)
@@ -280,9 +245,8 @@ In the eight question we know the attacker can use `xp_cmdshell`, we could check
 
 Look closely, we could see `ngrok` is present. Google searched `ngrok` could somewhat told us that the attacker could be using this to hide from us.
 
-:::success
-The answer is "ngrok"
-:::
+`The answer is "ngrok"`
+
 **Final Question**
 
 ![image](https://hackmd.io/_uploads/SJHD_J-ikg.png)
@@ -299,12 +263,11 @@ Let's check if the database is accessed in access.log
 
 Interesting ! Only 3 database has been accessed. But if we look closely, only `portal and Credit` is injected with drop database. Thus indicating us these 2 are the one affected.
 
-:::success
-The answer is "Credit,portal"
-:::
+`The answer is "Credit,portal"`
 
 ## Reverse Engineering
 ### JACK
+#### Thought process
 We got a .apk file, using `jadx` we could decompile it to java
  
 ![image](https://hackmd.io/_uploads/rka8YIZjJg.png)
@@ -325,7 +288,6 @@ Check the `Java_com_example_myapplication_MainActivity_stringFromJNI`
 Pseudocode by pressing `F5`
 
 ![image](https://hackmd.io/_uploads/B13Z0Ibiyg.png)
-
 
 We got a function called `doSomethings`, checking on it and we got this function 
 
@@ -349,12 +311,11 @@ So now we just need to XOR these two
 
 ![image](https://hackmd.io/_uploads/HJzCJvZoJg.png)
 
-:::success
-The answer is "BKSEC{Nhap_mon_mobile_xiu}"
-:::
+`The answer is "BKSEC{Nhap_mon_mobile_xiu}"`
 
 ## Binary Exploit
 ### ret2libc
+#### Thought process
 We got a `bof` and `libc.so.6` file. Use IDA to decompile the bof.
 
 ![image](https://hackmd.io/_uploads/S1yy-vWo1g.png)
