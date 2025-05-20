@@ -554,7 +554,7 @@ function SendResults {
 - `$XoX` is then sent to the server
 
 That was tiresome ~~. We got the `.pcapng` file tho, this could help us to get the data we need.
-#### $encrypedDataPackage ($XoX)
+#### `$encrypedDataPackage` (`$XoX`)
 
 Luckily the data was right at the beginning.
 
@@ -582,7 +582,7 @@ The endpoint was `/data` and sent with `HTTP POST`. Thus we could see our first 
 $encrypedDataPackage = 0IzL5AzL5_DItASOwoDMwAiPgQmb2ZWMiBHZ18Gat4Wa3BiPgI3b0Fmc0NXaulWbkFGI+AiWsZ_TkRFaupFVaNjYqZ_akpnV0RmbWVnWy40VTJjSRJ2X1cFZHZVUlhlTtQmbOBFTxQWWShFawV1V5MVUtp0STRkWxFlaORkTHZkRWRUV4ZlVOp0VnBiP
 ```
 
-#### $combinedMetadata ($2YngY)
+#### `$combinedMetadata` (`$2YngY`)
 We got `$XoX` and `$2YngY` was encrypted with bas64 to get `$XoX`.
 
 We could write a script to decode `$XoX` to get the data we need.
@@ -615,7 +615,7 @@ Remember ` $combinedMetadata = "> $encodedAesKey > $machineName > $username > $f
 - `$username`: win-ho5dpb1fvnd
 - `$formattedDateTime`: 00:09 - 19/09/24
 
-#### $encryptedAesKey ($cvf)
+#### `$encryptedAesKey` (`$cvf`)
 And `$encodedAesKey` also base64 encoded from `$encryptedAesKey`. Reuse the script to get what we need.
 ```powershell
 python -u "e:\CTF\UrgentTina SVATTT\B64Reverse.py"
@@ -623,7 +623,7 @@ fQKu8ge6wn1aw5mvungcVKbPlNVtePysBvsO/WXExiQoRBbJH6jB3C4aET51USIZ
 ```
 `$encryptedAesKey` was the result of the AES encryption. We need to find the key which was `$derivedKeyFromDateTime`
 
-#### $derivedKeyFromDateTime ($Uz19o)
+#### `$derivedKeyFromDateTime` (`$Uz19o`)
 `Ctrl` + `F` with `$Uz19o` give us where we could get the value for this variable.
 ```powershell
 $OgE = ([Environment]::MachineName).ToLower() ; $zVSza = ([Environment]::UserName).ToLower() ; $I26 = "yaginote.txt"
@@ -649,7 +649,7 @@ print(derivedKeyFromDateTime)
 python -u "e:\CTF\UrgentTina SVATTT\Uz.py"
 0009190924win-ho5dpb1fvndadministrator
 ```
-#### $masterEncryptionKey ($WiETm)
+#### `$masterEncryptionKey` (`$WiETm`)
 We got all the data to find `$masterEncryptionKey` now.
 
 ```python
@@ -684,7 +684,7 @@ Finally we got `$masterEncryptionKey: YaMfem0zr4jdiZsDUxv1TH69` now
 
 #### Logs 
 
-We only need to decrypt the logs that were sent to endpoint $7CiB:$UFX/logs
+We only need to decrypt the logs that were sent to endpoint `$7CiB:$UFX/logs`
 
 ![alt text](<../../../assets/images/urgent-tina/2025-04-08_01-06.png>)
 _HTTP Stream_
