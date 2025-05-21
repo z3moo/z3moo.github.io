@@ -2,9 +2,31 @@
 title: 'BYUCTF-2025 Writeups'
 description: 'All the challenges I solved during BYUCTF-2025, especially forensics'
 date: 2025-05-18
-tags: ['Writeups', 'Forensics', 'Reverse', 'CTF' ]
+tags: ['Writeups', 'Forensics', 'Reverse engineering', 'CTF', 'Web exploitation' ]
 image: './banner.webp'
 ---
+## Wimdows
+Wimdows was the biggest Forensics challenge in BYUCTF-2025. I'm giving it its own section because it has many parts and teaches important skills. While this scenario is unlikely in real life, it still provides educational value. I'll do a more in-depth analysis for this challenge than the others.
+
+### Wimdows 1
+#### Description
+![alt text](<../../../assets/images/BYUCTF-2025/Wimdows 1.png>)
+### Wimdows 2
+#### Description
+![alt text](<../../../assets/images/BYUCTF-2025/Wimdows 2.png>)
+#### Thought Process
+### Wimdows 3
+#### Description
+![alt text](<../../../assets/images/BYUCTF-2025/Wimdows 3.png>)
+#### Thought Process
+### Wimdows 4
+#### Description
+![alt text](<../../../assets/images/BYUCTF-2025/Wimdows 4.png>)
+#### Thought Process
+### Wimdows 5
+#### Description
+![alt text](<../../../assets/images/BYUCTF-2025/Wimdows 5.png>)
+#### Thought Process
 
 ## Forensics 
 ### Are You Looking Me Up?
@@ -133,34 +155,14 @@ TCP protocol is preferred for cryptocurrency mining because:
 The two hosts with abnormally high TCP traffic (172.16.0.10 and 172.16.0.5) showed patterns consistent with mining operations - maintaining persistent TCP connections and communicating with known mining infrastructure.
 
 -> The flag is `byuctf{172.16.0.10_172.16.0.5}`
-
-### Wimdows 
-#### Wimdows 1
-##### Desciprtion
-![alt text](<../../../assets/images/BYUCTF-2025/Wimdows 1.png>)
-##### Thought Process
-#### Wimdows 2
-##### Desciprtion
-![alt text](<../../../assets/images/BYUCTF-2025/Wimdows 2.png>)
-##### Thought Process
-#### Wimdows 3
-##### Desciprtion
-![alt text](<../../../assets/images/BYUCTF-2025/Wimdows 3.png>)
-##### Thought Process
-#### Wimdows 4
-##### Desciprtion
-![alt text](<../../../assets/images/BYUCTF-2025/Wimdows 4.png>)
-##### Thought Process
-#### Wimdows 5
-##### Desciprtion
-![alt text](<../../../assets/images/BYUCTF-2025/Wimdows 5.png>)
-##### Thought Process
-
 ## Reverse Engineering
 ### u
 #### Description
 ![alt text](../../../assets/images/BYUCTF-2025/u.png)
+_u_
+
 --> Files Here <--
+
 #### Thought process
 We received a Python file, and opening it revealed a long line of code.
 
@@ -216,8 +218,10 @@ Running the script reveals the flag: `byuctf{u_are_good_with_math}`
 ### LLIR
 #### Description 
 ![alt text](../../../assets/images/BYUCTF-2025/LLIR.png)
+_LLIR_
 
 --> Files here <--
+
 #### Thought process
 The challenge is called `LLIR` which likely refers to [this](https://github.com/llir/llvm) GitHub repository and the `.ll` file format. This suggests we can use LLVM tools to solve this challenge.
 
@@ -289,3 +293,31 @@ if s.check() == sat:
 [+] Flag: byuctf{lL1r_not_str41ght_to_4sm_458d}
 ```
 Running the script revealed the flag: `byuctf{lL1r_not_str41ght_to_4sm_458d}`
+### Baby Android 1
+#### Description
+
+![alt text](<../../../assets/images/BYUCTF-2025/Baby Android 1.png>)
+_Baby Android 1_
+
+--> Files here <--
+
+#### Thought process
+
+### Baby Android 2
+#### Description
+![alt text](<../../../assets/images/BYUCTF-2025/Baby Android 2.png>)
+_Baby Android 2_
+
+--> Files here <--
+
+#### Thought process
+
+## Web Exploitation
+### Red This
+#### Description
+![alt text](<../../../assets/images/BYUCTF-2025/Red This.png>)
+_Red This_
+
+--> Files here <--
+
+#### Thought process
