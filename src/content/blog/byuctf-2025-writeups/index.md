@@ -37,7 +37,7 @@ _Are You Looking Me Up?_
 --> Files here <--
 
 #### Thought Process
-Let's examine a few lines from the log file.
+Let me examine a few lines from the log file.
 
 ```bash
 ┌──(d4nhwu4n㉿hide-and-seek)-[/mnt/e/CTF/BYUCTF2025/for/Are You Looking Me Up]
@@ -63,7 +63,7 @@ Let's examine a few lines from the log file.
 2025-05-06T14:49:39+00:00 164,,,75a2b136446ad166a85f3150b40b7d1e,vtnet0,match,pass,in,4,0x0,,64,53856,0,DF,6,tcp,60,172.16.0.5,172.67.69.190,38512,443,0,S,4087106031,,64240,,mss;sackOK;TS;nop;wscale
 2025-05-06T14:49:39+00:00 164,,,75a2b136446ad166a85f3150b40b7d1e,vtnet0,match,pass,in,4,0x0,,64,60169,0,DF,6,tcp,60,172.16.0.5,104.26.10.102,58628,443,0,S,2650452426,,64240,,mss;sackOK;TS;nop;wscale
 ```
-From this log, we can identify which column contains the IP addresses we need to analyze. By determining which IP appears most frequently, we should have our answer.
+From this log, I can identify which column contains the IP addresses I need to analyze. By determining which IP appears most frequently, I should have my answer.
 
 ```bash
 ┌──(d4nhwu4n㉿hide-and-seek)-[/mnt/e/CTF/BYUCTF2025/for/Are You Looking Me Up]
@@ -133,7 +133,7 @@ _Mine Over Matter_
 --> Files Here <--
 
 #### Thought Process
-We were given network logs similar to the `Are You Looking Me Up?` challenge. Instead of focusing on specific ports, I needed to analyze the network protocols used by each host.
+I was given network logs similar to the `Are You Looking Me Up?` challenge. Instead of focusing on specific ports, I needed to analyze the network protocols used by each host.
 
 Most cryptocurrency mining operations use TCP for reliable connections to mining pools, so I filtered by TCP protocol:
 
@@ -164,13 +164,13 @@ _u_
 --> Files Here <--
 
 #### Thought process
-We received a Python file, and opening it revealed a long line of code.
+I received a Python file, and opening it revealed a long line of code.
 
 ```python
 ù,ú,û,ü,ũ,ū,ŭ,ů,ű,ų,ṳ,ṷ,ụ=chr,ord,abs,input,all,print,len,input,pow,range,list,dict,set;ù=[12838,1089,16029,13761,1276,14790,2091,17199,2223,2925,17901,3159,18135,18837,3135,19071,4095,19773,4797,4085,20007,5733,20709,17005,2601,9620,3192,9724,3127,8125];u,U=3,256;ṷ=ü();ʉ=ṳ(ụ([ű(u,û,U) for û in(ų(U))]))[u:ŭ(ù)+u];ṳ=zip;ṷ=[ú(û) for û in(ṷ)];assert(ŭ(ù)==ŭ(ṷ));assert(ũ([û*ü==ū for û,ü,ū in(ṳ(ʉ,ṷ,ù))]));
 ```
 
-Reversing it could reveal our flag, so I created a script to decode it.
+Reversing it could reveal my flag, so I created a script to decode it.
 
 ```python
 # The target values 
@@ -180,7 +180,7 @@ targets = [12838, 1089, 16029, 13761, 1276, 14790, 2091, 17199, 2223, 2925,
 
 # Calculate the powers of 3 
 powers = [pow(3, i, 256) for i in range(256)]  
-powers = powers[3:3+len(targets)]  # Only keep the ones we need
+powers = powers[3:3+len(targets)]  # Only keep the ones I need
 
 # Build the flag character by character
 flag = ""
@@ -195,13 +195,13 @@ print(flag)
 ```
 
 Code explanation:
-The challenge gives us a Python script that's deliberately made hard to read. Here's what's going on:
+The challenge gives me a Python script that's deliberately made hard to read. Here's what's going on:
 
 1. **Confusing Variable Names**: The original code uses strange symbols (ù, ú, û, etc.) as variable names:
    - These symbols are assigned to normal Python functions like `chr`, `ord`, `input`
    - This trick makes the code very difficult to understand at first glance
 
-2. **Hidden Array**: Inside this messy code is an array of numbers that holds our encoded flag
+2. **Hidden Array**: Inside this messy code is an array of numbers that holds my encoded flag
 
 3. **How the Encoding Works**: The code uses a simple encoding trick:
    - Each letter of the flag is multiplied by a specific number
@@ -223,9 +223,9 @@ _LLIR_
 --> Files here <--
 
 #### Thought process
-The challenge is called `LLIR` which likely refers to [this](https://github.com/llir/llvm) GitHub repository and the `.ll` file format. This suggests we can use LLVM tools to solve this challenge.
+The challenge is called `LLIR` which likely refers to [this](https://github.com/llir/llvm) GitHub repository and the `.ll` file format. This suggests I can use LLVM tools to solve this challenge.
 
-We can use LLVM to convert the `.ll` file to `.bc` (LLVM bytecode) and solve it from there, or alternatively, use a tool called llvm-cbe to convert it to C code for easier reading.
+I can use LLVM to convert the `.ll` file to `.bc` (LLVM bytecode) and solve it from there, or alternatively, use a tool called llvm-cbe to convert it to C code for easier reading.
 
 ```bash
 ┌──(d4nhwu4n㉿hide-and-seek)-[/mnt/e/CTF/BYUCTF2025/rev/LLDR]
@@ -311,6 +311,110 @@ _Baby Android 2_
 --> Files here <--
 
 #### Thought process
+I used jadx to decompile the `.apk` file to Java code for analysis.
+```bash
+┌──(d4nhwu4n㉿hide-and-seek)-[/mnt/e/CTF/BYUCTF2025/rev/baby and 2]
+└─$ sudo jadx --show-bad-code -d . /mnt/e/CTF/BYUCTF2025/rev/baby\ and\ 2/baby_android-2.apk
+INFO  - loading ...
+INFO  - processing ...
+ERROR - finished with errors, count: 20
+```
+After decompiling the APK, I searched for relevant strings by running grep to find instances of "byuctf" in the decompiled files:
+
+```bash
+┌──(d4nhwu4n㉿hide-and-seek)-[/mnt/e/CTF/BYUCTF2025/rev/baby and 2/baby_android-2.apk_decompiled]
+└─$ grep -R byuctf
+resources/AndroidManifest.xml:<manifest xmlns:android="http://schemas.android.com/apk/res/android" android:versionCode="1" android:versionName="1.0" android:compileSdkVersion="34" android:compileSdkVersionCodename="14" package="byuctf.babyandroid" platformBuildVersionCode="34" platformBuildVersionName="14">
+resources/AndroidManifest.xml:    <permission android:name="byuctf.babyandroid.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" android:protectionLevel="signature"/>
+resources/AndroidManifest.xml:    <uses-permission android:name="byuctf.babyandroid.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"/>
+resources/AndroidManifest.xml:        <activity android:name="byuctf.babyandroid.MainActivity" android:exported="true">
+resources/AndroidManifest.xml:        <provider android:name="androidx.startup.InitializationProvider" android:exported="false" android:authorities="byuctf.babyandroid.androidx-startup">
+grep: resources/classes2.dex: binary file matches
+grep: resources/classes3.dex: binary file matches
+grep: resources/classes4.dex: binary file matches
+grep: resources/lib/arm64-v8a/libbabyandroid.so: binary file matches
+grep: resources/lib/armeabi-v7a/libbabyandroid.so: binary file matches
+grep: resources/lib/x86/libbabyandroid.so: binary file matches
+grep: resources/lib/x86_64/libbabyandroid.so: binary file matches
+# ... and many more matches
+```
+In the `resources/lib/` directory, I found multiple binary files that matched the search pattern. These files included different architecture versions of the same library (`libbabyandroid.so`) for armeabi-v7a, x86, and x86_64. To analyze these binary files properly, I used IDA Pro to disassemble and examine their contents for the flag.
+
+After loading it to IDA, I searched for common function names like `main` or `flag` and found a function called `Java_byuctf_babyandroid_FlagChecker_check`, which is a function that likely contains the flag validation logic. 
+
+![alt text](<../../../assets/images/BYUCTF-2025/Baby Android 2/function.png>)
+
+Loading the function up and pressing `F5` to get its pseudocode:
+
+```cpp
+__int64 __fastcall Java_byuctf_babyandroid_FlagChecker_check(__int64 a1, __int64 a2, __int64 a3)
+{
+  __int64 StringUTFChars; // rax
+  int i; // [rsp+10h] [rbp-50h]
+  unsigned __int8 v6; // [rsp+3Fh] [rbp-21h]
+  _BYTE v7[24]; // [rsp+40h] [rbp-20h] BYREF
+  unsigned __int64 v8; // [rsp+58h] [rbp-8h]
+
+  v8 = __readfsqword(0x28u);
+  StringUTFChars = _JNIEnv::GetStringUTFChars(a1, a3, 0LL);
+  std::string::basic_string<decltype(nullptr)>(v7, StringUTFChars);
+  if ( sub_206F0(v7) == 23 )
+  {
+    for ( i = 0; i < 23; ++i )
+    {
+      if ( *(char *)sub_20710(v7, i) != aBycnuAacglyTtM[i * i % 47] )
+      {
+        v6 = 0;
+        goto LABEL_9;
+      }
+    }
+    v6 = 1;
+  }
+  else
+  {
+    v6 = 0;
+  }
+LABEL_9:
+  std::string::~string(v7);
+  return v6;
+}
+```
+
+Here's a simplified explanation of the code:
+
+- This function checks if the input matches the flag
+- Main logic:
+  - Checks if input is exactly 23 characters long
+  - Compares each character against a lookup table using a formula: `[i * i % 47]`
+  - Returns 1 if all characters match, 0 otherwise
+
+To solve this challenge, I needed to reverse-engineer the validation logic and extract the flag:
+
+I got `aBycnuAacglyTtM` from IDA
+
+![alt text](<../../../assets/images/BYUCTF-2025/Baby Android 2/lookup table.png>)
+
+```python
+#aBycnuAacglyTtM
+lookup_table = "bycnu)_aacGly~}tt+?=<_ML?f^i_vETkG+b{nDJrVp6=)"
+
+# Create array for flag
+flag = ['_'] * 23
+
+# Reverse the formula
+for i in range(23):
+    index = (i * i) % 47
+    if index < len(lookup_table):
+        flag[i] = lookup_table[index]
+
+print(''.join(flag))
+```
+```bash
+┌──(d4nhwu4n㉿hide-and-seek)-[/mnt/e/CTF/BYUCTF2025/rev/baby and 2]
+└─$ python solve.py
+byuctf{c++_in_an_apk??}
+```
+Running this script revealed the flag: `byuctf{c++_in_an_apk??}`
 
 ## Web Exploitation
 ### Red This
@@ -321,3 +425,154 @@ _Red This_
 --> Files here <--
 
 #### Thought process
+Accessing the website to see what I am dealing with:
+
+![alt text](<../../../assets/images/BYUCTF-2025/Red This/image.png>)
+
+The website provides me with a dropdown menu and a `Submit` button. Each time I click the `Submit` button, I get a quote from a famous person in the dropdown menu.
+
+I discovered a `/login` and a `/register` page but the page indicated it doesn't use SQL, which suggested I needed to look for a different type of vulnerability.
+
+The challenge provided me with the source code as well, so I examined it carefully.
+
+The main file `main.py` contains:
+
+```python
+### IMPORTS ###
+import flask, redis, os
+
+
+### INITIALIZATIONS ###
+app = flask.Flask(__name__)
+app.config['SECRET_KEY'] = os.urandom(32).hex()
+HOST = "redthis-redis"
+
+
+### HELPER FUNCTIONS ###
+def getData(key):
+    db = redis.Redis(host=HOST, port=6379, decode_responses=True)
+    value = db.get(key)
+    return value
+
+def getAdminOptions(username):
+    adminOptions = []
+    if username != None and username == "admin":
+        db = redis.Redis(host=HOST, port=6379, decode_responses=True)
+        adminOptions = db.json().get("admin_options", "$")[0]
+    return adminOptions
+
+
+
+### ROUTES ###
+@app.route('/', methods=['GET'])
+def root():
+    username = flask.session.get('username')
+    adminOptions = getAdminOptions(username)
+    return flask.render_template('index.html', adminOptions=adminOptions)
+
+
+# get quote 
+@app.route('/get_quote', methods=['POST'])
+def getQuote():
+    username = flask.session.get('username')
+    person = flask.request.form.get('famous_person')
+    quote = [person, '']
+    if "flag" in person and username != "admin":
+        quote[1] = "Nope"
+    else: 
+        quote[1] = getData(person)
+    adminOptions = getAdminOptions(username)
+    return flask.render_template('index.html', adminOptions=adminOptions, quote=quote)
+
+
+@app.route('/register', methods=['POST', 'GET'])
+def register():
+    # return register page 
+    if flask.request.method == 'GET':
+        error = flask.request.args.get('error')
+        return flask.render_template('register.html', error=error)
+
+    username = flask.request.form.get("username").lower()
+    password = flask.request.form.get("password")
+
+    ## error check
+    if not username or not password:
+        return flask.redirect('/register?error=Missing+fields')
+
+    ## if username already exists return error
+    isUser = getData(username)
+    if isUser:
+        return flask.redirect('/register?error=Username+already+taken')
+    else:
+        # insert new user and password
+        db = redis.Redis(host=HOST, port=6379, decode_responses=True)
+        # db.set(username, "User") # nah, we don't want to let you write to the db :)
+        passwordKey = username + "_password"
+        # db.set(passwordKey, password) # nah, we don't want to let you write to the db :)
+        flask.session['username'] = username
+        return flask.redirect('/')
+
+@app.route('/login', methods=['POST', 'GET'])
+def login():
+     # return register page 
+    if flask.request.method == 'GET':
+        error = flask.request.args.get('error')
+        return flask.render_template('login.html', error=error)
+    
+    username = flask.request.form.get("username").lower()
+    password = flask.request.form.get("password")
+
+    ## error check
+    if not username or not password:
+        return flask.redirect('/login?error=Missing+fields')
+    
+    # check username and password
+    dbUser = getData(username)
+    dbPassword = getData(username + "_password")
+    
+    if dbUser == "User" and dbPassword == password:
+        flask.session['username'] = username
+        return flask.redirect('/')
+    return flask.redirect('/login?error=Bad+login')
+
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=1337, debug=False, threaded=True)
+```
+
+After analyzing the source code, I noticed some interesting points:
+
+```python
+if "flag" in person and username != "admin":
+    quote[1] = "Nope"
+```
+If I send a request a `famous_person` containing `flag` and not logged in as `admin` it will
+
+```python 
+if username != None and username == "admin":
+    db = redis.Redis(host=HOST, port=6379, decode_responses=True)
+    adminOptions = db.json().get("admin_options", "$")[0]
+```
+Only if I am admin then i got to access to `admin_options`
+
+But there is a way to get the admin password by using Burp Suite.
+
+Using Burp Suite I can modify the request `/get_quote` to get the `admin_password`
+
+![alt text](<../../../assets/images/BYUCTF-2025/Red This/get_quote request.png>)
+
+We could modify the `FDR` to `admin_password` to get the password we need to log in as admin.
+
+![alt text](<../../../assets/images/BYUCTF-2025/Red This/modify request.png>)
+
+![alt text](<../../../assets/images/BYUCTF-2025/Red This/admin password.png>)
+
+Now we could use this to log in as admin
+
+![alt text](<../../../assets/images/BYUCTF-2025/Red This/admin logged in.png>)
+
+And now we got the flag as one of the option.
+
+![alt text](<../../../assets/images/BYUCTF-2025/Red This/flag.png>)
+
+The flag is: `byuctf{al1w4ys_s2n1tize_1nput-5ed1s_eik4oc85nxz}`
