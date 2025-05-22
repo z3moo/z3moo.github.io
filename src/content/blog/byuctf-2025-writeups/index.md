@@ -8,9 +8,12 @@ image: './banner.webp'
 ## Wimdows
 Wimdows was the biggest Forensics challenge in BYUCTF-2025. I'm giving it its own section because it has many parts and teaches important skills. While this scenario is unlikely in real life, it still provides educational value. I'll do a more in-depth analysis for this challenge than the others.
 
+This challenge involves analyzing a virtual machine image (~10GB) containing a Windows system with various forensic artifacts. Due to the large file size, I can't include the VM image here.
+
 ### Wimdows 1
 #### Description
 ![alt text](<../../../assets/images/BYUCTF-2025/Wimdows 1.png>)
+
 ### Wimdows 2
 #### Description
 ![alt text](<../../../assets/images/BYUCTF-2025/Wimdows 2.png>)
@@ -429,11 +432,11 @@ Accessing the website to see what I am dealing with:
 
 ![alt text](<../../../assets/images/BYUCTF-2025/Red This/image.png>)
 
-The website provides me with a dropdown menu and a `Submit` button. Each time I click the `Submit` button, I get a quote from a famous person in the dropdown menu.
+Upon visiting the site, I found a simple interface featuring a dropdown menu of famous individuals and a `Submit` button. When a person is selected and the button clicked, the application displays a quotation attributed to that person.
 
-I discovered a `/login` and a `/register` page but the page indicated it doesn't use SQL, which suggested I needed to look for a different type of vulnerability.
+During my initial reconnaissance, I discovered both `/login` and `/register` endpoints. Notably, the application mentioned it doesn't use SQL, which immediately directed my attention toward alternative injection vulnerabilities.
 
-The challenge provided me with the source code as well, so I examined it carefully.
+The challenge also provided the source code, giving me an opportunity to perform a thorough code review.
 
 The main file `main.py` contains:
 
