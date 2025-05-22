@@ -546,32 +546,34 @@ After analyzing the source code, I noticed some interesting points:
 if "flag" in person and username != "admin":
     quote[1] = "Nope"
 ```
-If I send a request a `famous_person` containing `flag` and not logged in as `admin` it will
+This code block shows that if I send a request with a `famous_person` parameter containing the word "flag" while not logged in as the "admin" user, the application would return "Nope" instead of the actual data.
 
 ```python 
 if username != None and username == "admin":
     db = redis.Redis(host=HOST, port=6379, decode_responses=True)
     adminOptions = db.json().get("admin_options", "$")[0]
 ```
-Only if I am admin then i got to access to `admin_options`
+This second code block reveals that only authenticated admin users can access the `admin_options` stored in the Redis database.
 
-But there is a way to get the admin password by using Burp Suite.
+After analyzing these code snippets, I identified a potential vulnerability in the Redis database access. Since Redis doesn't authenticate individual keys by default, I decided to try accessing restricted data using Burp Suite.
 
-Using Burp Suite I can modify the request `/get_quote` to get the `admin_password`
+Using Burp Suite, I intercepted and modified the `/get_quote` request to retrieve the admin password:
 
 ![alt text](<../../../assets/images/BYUCTF-2025/Red This/get_quote request.png>)
 
-We could modify the `FDR` to `admin_password` to get the password we need to log in as admin.
+I modified the request by changing the `famous_person` parameter from `FDR` to `admin_password` to retrieve the admin's password:
 
 ![alt text](<../../../assets/images/BYUCTF-2025/Red This/modify request.png>)
 
+The response contained the admin password:
+
 ![alt text](<../../../assets/images/BYUCTF-2025/Red This/admin password.png>)
 
-Now we could use this to log in as admin
+Now I could use this password to log in as admin:
 
 ![alt text](<../../../assets/images/BYUCTF-2025/Red This/admin logged in.png>)
 
-And now we got the flag as one of the option.
+After logging in as admin, I gained access to the flag, which appeared as one of the admin options:
 
 ![alt text](<../../../assets/images/BYUCTF-2025/Red This/flag.png>)
 
