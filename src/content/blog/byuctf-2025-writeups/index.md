@@ -1170,7 +1170,7 @@ Running this script revealed the flag: `byuctf{c++_in_an_apk??}`
 ![alt text](<../../../assets/images/BYUCTF-2025/Red This.png>)
 _Red This_
 
---> Files here <--
+[--> Files here <--](https://github.com/z3moo/ctf/blob/main/BYUCTF_2025/Red%20This/redthis.zip)
 
 #### Thought process
 Accessing the website to see what I am dealing with:
