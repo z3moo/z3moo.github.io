@@ -472,7 +472,7 @@ Based on the forensic analysis of the Sysmon logs and system artifacts, I've rec
 ![alt text](<../../../assets/images/BYUCTF-2025/Are You Looking Me Up.png>)
 _Are You Looking Me Up?_
 
---> Files here <--
+[--> Files Here <--](https://github.com/z3moo/ctf/blob/main/BYUCTF_2025/Are%20You%20Looking%20Me%20Up/logs.txt)
 
 #### Thought Process
 Let me examine a few lines from the log file.
@@ -568,7 +568,7 @@ The output lists IP addresses by frequency, revealing patterns in the network tr
 ![alt text](<../../../assets/images/BYUCTF-2025/Mine Over Matter.png>)
 _Mine Over Matter_
 
---> Files Here <--
+[--> Files Here <--](https://github.com/z3moo/ctf/blob/main/BYUCTF_2025/Mine%20Over%20Matter/logs.txt)
 
 #### Thought Process
 Looking at this challenge, I was given network logs similar to the previous `Are You Looking Me Up?` challenge. The challenge name "Mine over Matter" strongly suggests we're looking for cryptocurrency mining activity.
@@ -911,8 +911,6 @@ The following hosts are CONFIRMED cryptocurrency miners:
 ![alt text](../../../assets/images/BYUCTF-2025/u.png)
 _u_
 
---> Files Here <--
-
 #### Thought process
 I received a Python file, and opening it revealed a long line of code.
 
@@ -970,7 +968,7 @@ Running the script reveals the flag: `byuctf{u_are_good_with_math}`
 ![alt text](../../../assets/images/BYUCTF-2025/LLIR.png)
 _LLIR_
 
---> Files here <--
+[--> Files here <--](https://github.com/z3moo/ctf/blob/main/BYUCTF_2025/LLIR/checker.ll)
 
 #### Thought process
 The challenge is called `LLIR` which likely refers to [this](https://github.com/llir/llvm) GitHub repository and the `.ll` file format. This suggests I can use LLVM tools to solve this challenge.
@@ -1049,7 +1047,7 @@ Running the script revealed the flag: `byuctf{lL1r_not_str41ght_to_4sm_458d}`
 ![alt text](<../../../assets/images/BYUCTF-2025/Baby Android 1.png>)
 _Baby Android 1_
 
---> Files here <--
+[--> Files here <--](https://github.com/z3moo/ctf/blob/main/BYUCTF_2025/Baby%20Android%201/baby-android-1.apk)
 
 #### Thought process
 
@@ -1058,7 +1056,7 @@ _Baby Android 1_
 ![alt text](<../../../assets/images/BYUCTF-2025/Baby Android 2.png>)
 _Baby Android 2_
 
---> Files here <--
+[--> Files here <--](https://github.com/z3moo/ctf/blob/main/BYUCTF_2025/Baby%20Android%202/baby_android-2.apk)
 
 #### Thought process
 I used jadx to decompile the `.apk` file to Java code for analysis.
