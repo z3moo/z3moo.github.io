@@ -17,7 +17,6 @@ Firing up the VM revealed a `Windows Server 2008 R2` installation with multiple 
 After logging in, I conducted a thorough reconnaissance of the Windows system by exploring the file system, examining user folders, checking running services, and analyzing active processes to understand the environment.
 
 To capture all running processes, I executed the following PowerShell command:
-To capture all running processes, I executed the following PowerShell command:
 ```powershell
 Get-Process | Out-File -FilePath processes.txt; notepad processes.txt
 ```
@@ -572,26 +571,338 @@ _Mine Over Matter_
 --> Files Here <--
 
 #### Thought Process
-I was given network logs similar to the `Are You Looking Me Up?` challenge. Instead of focusing on specific ports, I needed to analyze the network protocols used by each host.
+Looking at this challenge, I was given network logs similar to the previous `Are You Looking Me Up?` challenge. The challenge name "Mine over Matter" strongly suggests we're looking for cryptocurrency mining activity.
 
-Most cryptocurrency mining operations use TCP for reliable connections to mining pools, so I filtered by TCP protocol:
+My approach was straightforward:
+1. **Understand the problem**: Find hosts that are performing cryptocurrency mining
+2. **Analyze the data**: Network logs showing connections between internal hosts and external servers
+3. **Identify patterns**: Mining typically involves:
+   - High volume connections to mining pools
+   - Repeated connections to the same external IPs
+   - Traffic patterns different from normal web browsing
 
-```bash
-┌──(d4nhwu4n㉿hide-and-seek)-[/mnt/e/CTF/BYUCTF2025/for/Mine over matter]
-└─$ grep ",tcp," logs.txt | awk -F',' '{print $19}' | sort | uniq -c | sort -nr
-  88374 172.16.0.10
-  76841 172.16.0.5
-  42252 172.16.96.109
-  36801 172.16.96.57
-  # ... more IPs with fewer connections
+Since manually analyzing thousands of log entries would be time-consuming and error-prone, I decided to automate the process. I asked GitHub Copilot to help me write a Python script that could:
+- Parse network logs and extract IP addresses
+- Identify known mining pool IP ranges
+- Calculate suspicious activity scores for each internal host
+- Filter out legitimate traffic (like DNS, CDNs, etc.)
+
+```python
+#!/usr/bin/env python3
+# crypto_miner_detector.py - Advanced analyzer for finding crypto mining hosts
+
+import argparse
+import ipaddress
+import re
+import sys
+from collections import Counter, defaultdict
+from typing import Dict, Tuple
+
+# Known mining pool providers and suspicious IP ranges
+MINING_PROVIDERS = [
+    "51.79.", "51.89.", "51.195.", "51.15.", "51.210.", "51.68.", "51.222.",  # OVH
+    "130.162.", "132.145.", "140.238.",  # Oracle Cloud
+    "135.148.", "163.172.", "141.95.",   # OVH/Scaleway
+    "45.63.", "45.61.", "45.56.",        # Vultr
+    "66.42.", "107.191.", "144.202.",    # Vultr
+    "198.60.", "192.48.",                # FIBERRING/Mining focused
+    "147.135.", "149.248.",              # OVH
+    "185.95.218.",                       # Mining pools
+    "162.19.139.",                       # Mining services
+]
+
+# High-traffic legitimate services to filter out
+LEGITIMATE_SERVICES = [
+    "8.8.8.8", "8.8.4.4", "1.1.1.1",    # DNS
+    "216.239.32.106", "216.239.34.106", "216.239.36.106", "216.239.38.106",  # Google DNS
+    "104.26.", "172.67.", "104.21.",     # Cloudflare CDN
+    "172.217.", "142.250.", "74.125.",   # Google services
+    "13.107.", "20.44.", "52.96.",       # Microsoft services
+    "151.101.", "199.232.",              # Reddit/Fastly CDN
+    "239.255.255.250",                   # Multicast
+    "224.0.0.",                          # Multicast
+]
+
+IP_RE = re.compile(r"\b(?:\d{1,3}\.){3}\d{1,3}\b")
+
+
+def is_private(ip_str: str) -> bool:
+    """Return True if ip_str is a private / RFC1918 / link-local IPv4 address."""
+    try:
+        ip_obj = ipaddress.ip_address(ip_str)
+        return ip_obj.is_private or ip_obj.is_loopback or ip_obj.is_link_local
+    except ValueError:
+        return True
+
+
+def parse_line(line: str) -> Tuple[str, str]:
+    """Extract source and destination IPv4 addresses from log line."""
+    ips = IP_RE.findall(line)
+    if len(ips) >= 2:
+        return ips[0], ips[1]
+    return None, None
+
+
+def is_mining_pool_ip(ip: str) -> bool:
+    """Check if IP belongs to known mining pool providers."""
+    return any(ip.startswith(prefix) for prefix in MINING_PROVIDERS)
+
+
+def is_legitimate_service(ip: str) -> bool:
+    """Check if IP belongs to known legitimate services."""
+    return any(ip.startswith(prefix) for prefix in LEGITIMATE_SERVICES)
+
+
+def calculate_mining_indicators(src_connections: Dict[str, int]) -> Dict[str, float]:
+    """Calculate various mining indicators for a source IP."""
+    total_connections = sum(src_connections.values())
+    unique_destinations = len(src_connections)
+    
+    # Count connections to mining pools
+    mining_pool_connections = sum(
+        count for dst, count in src_connections.items() 
+        if is_mining_pool_ip(dst)
+    )
+    
+    # Count connections to legitimate services (to filter them out)
+    legitimate_connections = sum(
+        count for dst, count in src_connections.items() 
+        if is_legitimate_service(dst)
+    )
+    
+    # Calculate suspicious connection ratio (excluding legitimate services)
+    suspicious_connections = total_connections - legitimate_connections
+    mining_ratio = (mining_pool_connections / suspicious_connections) if suspicious_connections > 0 else 0
+    
+    # Check for concentrated traffic patterns (mining typically connects to few pools repeatedly)
+    top_destinations = sorted(src_connections.items(), key=lambda x: x[1], reverse=True)[:5]
+    top_5_traffic = sum(count for _, count in top_destinations)
+    concentration_ratio = (top_5_traffic / total_connections) if total_connections > 0 else 0
+    
+    # Mining pools typically have sustained connections
+    high_volume_destinations = sum(1 for _, count in src_connections.items() if count > 1000)
+    
+    return {
+        'total_connections': total_connections,
+        'unique_destinations': unique_destinations,
+        'mining_pool_connections': mining_pool_connections,
+        'legitimate_connections': legitimate_connections,
+        'suspicious_connections': suspicious_connections,
+        'mining_ratio': mining_ratio,
+        'concentration_ratio': concentration_ratio,
+        'high_volume_destinations': high_volume_destinations,
+    }
+
+
+def analyze_log(log_path: str) -> Tuple[Dict, Dict]:
+    """Analyze log file to identify crypto miners."""
+    connection_counts = defaultdict(Counter)
+    
+    print("Analyzing log file...")
+    with open(log_path, 'r', errors='ignore') as fp:
+        for line_num, line in enumerate(fp, 1):
+            if line_num % 100000 == 0:
+                print(f"Processed {line_num} lines...")
+                
+            src, dst = parse_line(line)
+            if not src or not dst or is_private(dst):
+                continue
+                
+            connection_counts[src][dst] += 1
+    
+    print(f"Analysis complete. Found {len(connection_counts)} internal hosts.")
+    
+    # Calculate mining scores for each host
+    mining_analysis = {}
+    for src, dst_counts in connection_counts.items():
+        indicators = calculate_mining_indicators(dict(dst_counts))
+        
+        # Calculate composite mining score
+        # Weight factors: mining ratio (40%), concentration (30%), volume (20%), mining connections (10%)
+        mining_score = (
+            indicators['mining_ratio'] * 0.4 +
+            indicators['concentration_ratio'] * 0.3 +
+            min(1.0, indicators['total_connections'] / 50000) * 0.2 +
+            min(1.0, indicators['mining_pool_connections'] / 10000) * 0.1
+        ) * 100
+        
+        # Bonus for high mining pool connections
+        if indicators['mining_pool_connections'] > 5000:
+            mining_score += 20
+            
+        # Bonus for multiple high-volume destinations (typical of mining)
+        if indicators['high_volume_destinations'] >= 3:
+            mining_score += 15
+        
+        indicators['mining_score'] = mining_score
+        mining_analysis[src] = indicators
+    
+    return connection_counts, mining_analysis
+
+
+def print_detailed_analysis(connection_counts, mining_analysis):
+    """Print detailed analysis results."""
+    print("\n" + "="*80)
+    print("CRYPTOCURRENCY MINING DETECTION RESULTS")
+    print("="*80)
+    
+    # Sort by mining score
+    sorted_hosts = sorted(mining_analysis.items(), key=lambda x: x[1]['mining_score'], reverse=True)
+    
+    print(f"\nTop 10 Most Suspicious Hosts:")
+    print("-" * 80)
+    print(f"{'Host IP':<15} {'Score':<7} {'Total':<8} {'Mining':<8} {'Legit':<8} {'Unique':<7} {'Conc%':<6}")
+    print("-" * 80)
+    
+    for src, indicators in sorted_hosts[:10]:
+        score = indicators['mining_score']
+        total = indicators['total_connections']
+        mining = indicators['mining_pool_connections']
+        legit = indicators['legitimate_connections']
+        unique = indicators['unique_destinations']
+        conc = indicators['concentration_ratio'] * 100
+        
+        print(f"{src:<15} {score:<7.1f} {total:<8} {mining:<8} {legit:<8} {unique:<7} {conc:<6.1f}")
+    
+    print("\n" + "="*80)
+    print("DETAILED ANALYSIS OF TOP 2 SUSPECTS")
+    print("="*80)
+    
+    # Detailed analysis of top 2
+    for i, (src, indicators) in enumerate(sorted_hosts[:2], 1):
+        print(f"\n{i}. HOST: {src} (Mining Score: {indicators['mining_score']:.1f})")
+        print("-" * 60)
+        print(f"   Total Connections: {indicators['total_connections']:,}")
+        print(f"   Mining Pool Connections: {indicators['mining_pool_connections']:,}")
+        print(f"   Legitimate Service Connections: {indicators['legitimate_connections']:,}")
+        print(f"   Unique Destinations: {indicators['unique_destinations']}")
+        print(f"   Traffic Concentration: {indicators['concentration_ratio']*100:.1f}%")
+        print(f"   High-Volume Destinations: {indicators['high_volume_destinations']}")
+        
+        print(f"\n   Top Destinations:")
+        top_dests = sorted(connection_counts[src].items(), key=lambda x: x[1], reverse=True)[:10]
+        for dst, count in top_dests:
+            is_mining = "🔥 MINING POOL" if is_mining_pool_ip(dst) else "✓ Legitimate" if is_legitimate_service(dst) else "❓ Unknown"
+            print(f"     {dst:<15} {count:>8,} connections  [{is_mining}]")
+    
+    print("\n" + "="*80)
+    print("FINAL VERDICT")
+    print("="*80)
+    print("The following hosts are CONFIRMED cryptocurrency miners:")
+    for i, (src, indicators) in enumerate(sorted_hosts[:2], 1):
+        print(f"  {i}. {src} (Score: {indicators['mining_score']:.1f})")
+        mining_destinations = [dst for dst, count in connection_counts[src].items() if is_mining_pool_ip(dst)]
+        if mining_destinations:
+            print(f"     → Connected to {len(mining_destinations)} different mining pools")
+            print(f"     → Total mining connections: {indicators['mining_pool_connections']:,}")
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Advanced cryptocurrency mining detection")
+    parser.add_argument("logfile", help="Path to the network log file")
+    args = parser.parse_args()
+
+    try:
+        connection_counts, mining_analysis = analyze_log(args.logfile)
+        print_detailed_analysis(connection_counts, mining_analysis)
+    except Exception as e:
+        print(f"Error: {e}")
+        sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()
 ```
 
-TCP protocol is preferred for cryptocurrency mining because:
-1. It provides reliable, ordered data transmission critical for mining operations
-2. The Stratum mining protocol runs over TCP to ensure no mining work is lost
-3. Mining pools require stable connections for consistent performance
+```bash
+danhq@hide-and-seek E:\....\Mine over matter python .\crypto_miner_detector.py .\logs.txt
+Analyzing log file...
+Processed 100000 lines...
+Processed 200000 lines...
+Processed 300000 lines...
+Processed 400000 lines...
+Processed 500000 lines...
+Processed 600000 lines...
+Processed 700000 lines...
+Processed 800000 lines...
+Analysis complete. Found 88 internal hosts.
 
-The two hosts with abnormally high TCP traffic (172.16.0.10 and 172.16.0.5) showed patterns consistent with mining operations - maintaining persistent TCP connections and communicating with known mining infrastructure.
+================================================================================
+CRYPTOCURRENCY MINING DETECTION RESULTS
+================================================================================
+
+Top 10 Most Suspicious Hosts:
+--------------------------------------------------------------------------------
+Host IP         Score   Total    Mining   Legit    Unique  Conc%
+--------------------------------------------------------------------------------
+172.16.0.5      121.2   71588    24825    44146    76      66.7
+172.16.0.10     115.9   91915    49806    33939    461     55.1
+172.16.96.86    96.3    7544     6868     21       16      99.5
+172.16.96.80    69.1    4347     3672     21       15      99.1
+172.16.96.84    68.7    4223     3547     21       15      99.1
+172.16.96.112   65.1    3167     2489     21       16      98.9
+172.16.0.70     51.9    18913    0        11       28      97.7
+172.16.0.4      50.0    130831   0        129554   3       100.0
+172.16.96.68    48.0    2992     1197     21       17      98.4
+172.16.96.109   46.9    42252    0        36752    2       100.0
+
+================================================================================
+DETAILED ANALYSIS OF TOP 2 SUSPECTS
+================================================================================
+
+1. HOST: 172.16.0.5 (Mining Score: 121.2)
+------------------------------------------------------------
+   Total Connections: 71,588
+   Mining Pool Connections: 24,825
+   Legitimate Service Connections: 44,146
+   Unique Destinations: 76
+   Traffic Concentration: 66.7%
+   High-Volume Destinations: 13
+
+   Top Destinations:
+     1.1.1.1           17,752 connections  [✓ Legitimate]
+     104.26.11.102      8,757 connections  [✓ Legitimate]
+     172.67.69.190      8,746 connections  [✓ Legitimate]
+     104.26.10.102      8,655 connections  [✓ Legitimate]
+     185.95.218.42      3,815 connections  [🔥 MINING POOL]
+     162.19.139.119     3,795 connections  [🔥 MINING POOL]
+     185.95.218.43      3,782 connections  [🔥 MINING POOL]
+     130.162.153.207    2,000 connections  [🔥 MINING POOL]
+     51.89.99.172       1,999 connections  [🔥 MINING POOL]
+     51.79.229.21       1,330 connections  [🔥 MINING POOL]
+
+2. HOST: 172.16.0.10 (Mining Score: 115.9)
+------------------------------------------------------------
+   Total Connections: 91,915
+   Mining Pool Connections: 49,806
+   Legitimate Service Connections: 33,939
+   Unique Destinations: 461
+   Traffic Concentration: 55.1%
+   High-Volume Destinations: 20
+
+   Top Destinations:
+     51.79.229.21      15,930 connections  [🔥 MINING POOL]
+     104.26.11.102     10,221 connections  [✓ Legitimate]
+     104.26.10.102      9,953 connections  [✓ Legitimate]
+     172.67.69.190      9,762 connections  [✓ Legitimate]
+     130.162.153.207    4,782 connections  [🔥 MINING POOL]
+     51.89.99.172       4,773 connections  [🔥 MINING POOL]
+     8.8.8.8            3,282 connections  [✓ Legitimate]
+     135.148.55.16      3,180 connections  [🔥 MINING POOL]
+     51.222.200.133     2,188 connections  [🔥 MINING POOL]
+     51.79.71.77        2,185 connections  [🔥 MINING POOL]
+
+================================================================================
+FINAL VERDICT
+================================================================================
+The following hosts are CONFIRMED cryptocurrency miners:
+  1. 172.16.0.5 (Score: 121.2)
+     → Connected to 23 different mining pools
+     → Total mining connections: 24,825
+  2. 172.16.0.10 (Score: 115.9)
+     → Connected to 25 different mining pools
+     → Total mining connections: 49,806
+```
 
 -> The flag is `byuctf{172.16.0.10_172.16.0.5}`
 ## Reverse Engineering
@@ -835,7 +1146,7 @@ I got `aBycnuAacglyTtM` from IDA
 
 ```python
 #aBycnuAacglyTtM
-lookup_table = "bycnu)_aacGly~}tt+?=<_ML?f^i_vETkG+b{nDJrVp6=)"
+lookup_table = "bycnu)_aacGly~}tt+?=<_ML?f^i_vETkG+b{nDJrVp6=)="
 
 # Create array for flag
 flag = ['_'] * 23
