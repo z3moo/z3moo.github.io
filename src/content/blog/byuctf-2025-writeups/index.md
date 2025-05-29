@@ -2,7 +2,7 @@
 title: 'BYUCTF-2025 Writeups'
 description: 'All the challenges I solved during BYUCTF-2025, especially forensics'
 date: 2025-05-18
-tags: ['Writeups', 'Forensics', 'Reverse engineering', 'CTF', 'Web exploitation' ]
+tags: ['Writeups', 'Forensics', 'Reverse Engineering', 'CTF', 'Web Exploitation' ]
 image: './banner.webp'
 ---
 ## Wimdows
