@@ -1,5 +1,5 @@
 ---
-title: 'Ubuntu VM Compromise Analysis'
+title: ' Compromised Ubuntu VMAnalysis'
 description: 'Forensic analysis of a compromised Ubuntu virtual machine - investigating attack vectors, persistence mechanisms, and malicious activities'
 date: 2025-05-29
 tags: ['Forensics', 'Incident Response', 'Linux', 'Ubuntu', 'Malware Analysis']
@@ -209,4 +209,50 @@ However, I realized that using SCP won't work since this folder is only accessib
 ssh student@192.168.187.132 "echo 'password' | sudo -S cat /nextcloud/nextcloud.log" > nextcloud.log
 ssh student@192.168.187.132 "echo 'password' | sudo -S cat /nextcloud/owncloud.db" > owncloud.db
 ```
+### Log Analysis 
+#### RCE 
+Examining the Nextcloud log file revealed several concerning patterns that immediately caught my attention. The log entries showed evidence of multiple unauthorized access attempts and potential exploitation activities.
 
+![alt text](<../../../assets/images/ubuntu_vm/sus entries.png>)
+
+The log analysis revealed several concerning patterns:
+
+- **Repeated PUT Requests**: 
+    - User: philip 
+    - File: `datei.txt` was edited and re-saved multiple times
+    - App: files_texteditor (built-in web-based text editor in Nextcloud)
+- **Suspicious GET Request to status.php**:
+    - User: -- (unauthenticated)
+    - URL: `/status.php/PHP_VALUE%0Ainclude_path=/tmp;;;;;;?a=/bin/sh+-c+'which+which'&QQQQQQQQ...`
+
+The GET request contained URL-encoded parameters that appeared to be attempting code injection, specifically trying to modify the include path to `/tmp` and execute shell commands.
+
+Multiple similar GET requests were found in the logs with what appeared to be attempts to gain unauthorized system access through the web application. These requests showed patterns consistent with exploitation attempts targeting the web service.
+
+The timestamps in these log entries correlated with the last known activity of the `vagrant` user, suggesting a potential connection between the compromised account and the web application exploitation attempts.
+#### Post RCE
+After successfully executing `/tmp/a`, the attacker issued the following commands via the same method (using the `a=...` parameter in GET requests):
+
+- `ls /nextcloud/`
+- `ls /nextcloud/philip/`
+- `ls /nextcloud/philip/files/`
+- `ls /nextcloud/philip/files/bank-clients`
+- `cat /nextcloud/philip/files/bank-clients/clients_bank_data.xml`
+- `openssl enc -aes256 -base64 --pass pass:d0nt_cry_n3xt -in /nextcloud/philip/files/employee/Employee_Salary_List.xlsx`
+
+The attacker attempted to encrypt `Employee_Salary_List.xlsx` using OpenSSL in `/nextcloud/philip/files/employee/`, which suggests a potential ransomware attack or data exfiltration preparation.
+
+Upon examining the directory path, I discovered that while the file had been encrypted, the original file remained in place.
+
+```bash
+root@ubuntu:/nextcloud/philip/files/employee# ls -lah
+total 96K
+drwxrwxr-x 2 www-data www-data 4.0K Apr 28  2021 .
+drwxrwxr-x 9 www-data www-data 4.0K Apr 27  2021 ..
+-rw-rw-r-- 1 www-data www-data  18K Apr 28  2021 Employee_contact_list.xlsx
+-rw-r--r-- 1 www-data www-data  24K Apr 27  2021 Employee_contact_list.xlsx.cry
+-rw-rw-r-- 1 www-data www-data  18K Apr 28  2021 Employee_Salary_List.xlsx
+-rw-r--r-- 1 www-data www-data  24K Apr 27  2021 Employee_Salary_List.xlsx.cry
+```
+
+wip
