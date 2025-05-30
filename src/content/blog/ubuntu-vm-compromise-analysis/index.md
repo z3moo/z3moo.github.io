@@ -3,7 +3,7 @@ title: 'Ubuntu VM Compromise Analysis'
 description: 'Forensic analysis of a compromised Ubuntu virtual machine - investigating attack vectors, persistence mechanisms, and malicious activities'
 date: 2025-05-29
 tags: ['Forensics', 'Incident Response', 'Linux', 'Ubuntu', 'Malware Analysis']
-author: 'pacho'
+image: './banner.png'
 ---
 
 ## Introduction
@@ -210,4 +210,3 @@ ssh student@192.168.187.132 "echo 'password' | sudo -S cat /nextcloud/nextcloud.
 ssh student@192.168.187.132 "echo 'password' | sudo -S cat /nextcloud/owncloud.db" > owncloud.db
 ```
 
-wip
