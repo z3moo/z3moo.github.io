@@ -10,7 +10,9 @@ image: './banner.png'
 
 My mentor @teebowie provided me with a `.vdi` file and asked me to investigate what happened and write a comprehensive report about the incident. This document presents my forensic analysis findings (probably)
 
-## Initial Setup and Reconnaissance
+## Thought Process
+
+### Initial Setup and Reconnaissance
 
 Since I'm using VMware, I first needed to convert the `.vdi` file to `.vmdk` format using the following command:
 
@@ -177,11 +179,10 @@ drwxr-xr-x  14 root     root     4.0K Apr 27  2021 var
 I notice several interesting items in the root directory:
 - `/tmp` directory (common location for temporary files and potential staging area)
 - `/nextcloud` directory owned by `www-data` (indicates a web application installation)
-- `swap.img` file that is 1.3GB in size
 
 While these are normal system components, attackers often leverage these locations to carry out their attacks. I'll investigate these areas first.
 
-## Nextcloud Directory Investigation
+### Nextcloud Directory Investigation
 
 I decided to investigate the `/nextcloud` folder more thoroughly:
 
@@ -208,8 +209,8 @@ However, I realized that using SCP won't work since this folder is only accessib
 ```bash
 ssh student@192.168.187.132 "echo 'password' | sudo -S cat /nextcloud/nextcloud.log" > nextcloud.log
 ```
-### Log Analysis 
-#### RCE 
+#### Log Analysis 
+##### RCE 
 Examining the Nextcloud log file revealed several concerning patterns that immediately caught my attention. The log entries showed evidence of multiple unauthorized access attempts and potential exploitation activities.
 
 ![alt text](<../../../assets/images/ubuntu_vm/sus entries.png>)
@@ -229,7 +230,7 @@ The GET request contained URL-encoded parameters that appeared to be attempting 
 Multiple similar GET requests were found in the logs with what appeared to be attempts to gain unauthorized system access through the web application. These requests showed patterns consistent with exploitation attempts targeting the web service.
 
 The timestamps in these log entries correlated with the last known activity of the `vagrant` user, suggesting a potential connection between the compromised account and the web application exploitation attempts.
-#### Post RCE
+##### Post RCE
 
 After successfully executing `/tmp/a`, the attacker issued the following commands (according to the log) via the same method (using the `a=...` parameter in GET requests):
 
@@ -255,7 +256,7 @@ drwxrwxr-x 9 www-data www-data 4.0K Apr 27  2021 ..
 -rw-r--r-- 1 www-data www-data  24K Apr 27  2021 Employee_Salary_List.xlsx.cry
 ```
 
-## Web Server Log Analysis
+### Web Server Log Analysis
 
 While examining `/var/log`, I noticed the presence of `nginx` logs, indicating that a web server was running on the system.
 
@@ -394,4 +395,111 @@ PHP message: PHP Warning:  Unknown: failed to open stream: No such file or direc
 2021/04/27 09:39:44 [error] 4938#4938: *1255 FastCGI sent in stderr: "PHP message: PHP Warning:  Unknown: failed to open stream: No such file or directory in Unknown on line 0" while reading response header from upstream, client: 192.168.122.42, server: _, request: "GET /status.php?a=/bin/rm%20-f%20/nextcloud/philip/files/employee/Employee_contact_list.xlsx HTTP/1.1", upstream: "fastcgi://127.0.0.1:9000", host: "192.168.122.4295"
 2021/04/27 09:39:44 [error] 4938#4938: *1255 FastCGI sent in stderr: "PHP message: PHP Fatal error:  Unknown: Failed opening required 'a' (include_path='.:') in Unknown on line 0" while reading upstream, client: 192.168.122.42, server: _, request: "GET /status.php?a=/bin/rm%20-f%20/nextcloud/philip/files/employee/Employee_contact_list.xlsx HTTP/1.1", upstream: "fastcgi://127.0.0.1:9000", host: "192.168.122.4295"
 ```
-wip
+
+From the nginx error logs, I can reconstruct a clear timeline of the attack and understand the attacker's methodology:
+
+**Initial Reconnaissance (09:05:57 - 09:07:22)**
+
+The attacker began with extensive reconnaissance attempts using various PHP exploit techniques:
+- **Path traversal attempts**: Multiple requests attempting to manipulate `PATH_INFO` and `auto_prepend_file` directives
+- **Command injection testing**: Testing the `which which` command to verify command execution capabilities
+
+**Encryption Phase (09:30:15 - 09:32:55)**
+
+The most critical phase of the attack involved systematic file encryption using OpenSSL:
+
+```bash
+/bin/openssl enc -aes256 -base64 --pass pass:d0nt_cry_n3xt 
+-in /nextcloud/philip/files/employee/Employee_Salary_List.xlsx 
+-out /nextcloud/philip/files/employee/Employee_Salary_List.xlsx.cry
+```
+
+Key characteristics of the encryption operation:
+- **Encryption algorithm**: AES-256 with base64 encoding
+- **Password**: `d0nt_cry_n3xt` (hardcoded in the command)
+- **Target files**: Employee salary and contact lists
+- **File extension**: `.cry` appended to encrypted files
+
+**Cleanup Attempts (09:32:43 - 09:39:44)**
+
+The attacker attempted to remove original files after encryption:
+- Attempted deletion of `Employee_Salary_List.xlsx`
+- Attempted deletion of `Employee_contact_list.xlsx`
+- These deletion attempts failed, likely due to insufficient permissions or active file locks
+
+### Attack Vector Analysis
+
+Based on the evidence gathered, the attack leveraged PHP path traversal techniques combined with an nginx web server running FastCGI. Researching "PHP nginx fastcgi CVE RCE" revealed the likely attack vector:
+
+![CVE Research Results](../../../assets/images/ubuntu_vm/proof.png)
+
+Further investigation on [TrendMicro's vulnerability analysis](https://www.trendmicro.com/vinfo/vn/security/news/vulnerabilities-and-exploits/php-fpm-vulnerability-cve-2019-11043-can-lead-to-remote-code-execution-in-nginx-web-servers) confirmed the attack pattern:
+
+![Attack Pattern Confirmation](../../../assets/images/ubuntu_vm/proof%202.png)
+
+The characteristic padding patterns observed in the logs match the exploitation signature of **CVE-2019-11043**, a critical vulnerability in PHP-FPM when used with nginx that allows remote code execution through environment variable manipulation.
+
+Additional evidence supporting the CVE-2019-11043 exploitation includes suspicious entries in the access logs:
+
+![Suspicious Log Entries](../../../assets/images/ubuntu_vm/proof%203.png)
+
+The presence of the malicious string `PHP%0Ais_the_shittiest_lang.php?` is a well-known indicator of CVE-2019-11043 exploitation attempts. Research confirms this pattern:
+
+![CVE Exploitation Pattern](../../../assets/images/ubuntu_vm/image.png)
+
+This further confirms that the attacker leveraged **CVE-2019-11043** to compromise the system.
+
+### System Vulnerability Assessment
+
+Verification of the PHP version on the compromised VM reveals:
+
+```bash
+root@ubuntu:/# php -v
+PHP 7.1.33dev (cli) (built: Apr 27 2021 06:42:37) ( NTS )
+Copyright (c) 1997-2018 The PHP Group
+Zend Engine v3.1.0, Copyright (c) 1998-2018 Zend Technologies
+```
+
+**Critical Finding**: This PHP 7.1.33 development version is vulnerable to CVE-2019-11043, which affects PHP versions 7.1.x before 7.1.33, 7.2.x before 7.2.24, and 7.3.x before 7.3.11 when running with nginx and PHP-FPM.
+
+To understand how this vulnerable PHP version was installed, I investigated the system's package management logs. However, no installation records were found in either `dpkg` or `apt` logs, suggesting that PHP was installed from source or through alternative means.
+
+Examining the PHP binary file metadata:
+
+```bash
+root@ubuntu:/# stat /usr/bin/php
+  File: /usr/bin/php
+  Size: 55138328        Blocks: 107704     IO Block: 4096   regular file
+Device: fd00h/64768d    Inode: 11640       Links: 1
+Access: (0755/-rwxr-xr-x)  Uid: (    0/    root)   Gid: (    0/    root)
+Access: 2021-04-28 16:47:51.465054840 +0000
+Modify: 2021-04-27 06:43:45.000000000 +0000
+Change: 2021-04-27 07:29:37.566050821 +0000
+ Birth: -
+```
+
+Given that the `vagrant` user's last login was on April 28, 2021 at 17:26:27, this timeline suggests a potential connection between the vagrant user and the PHP installation.
+
+## Summary
+
+This forensic analysis uncovered a sophisticated cyberattack against an Ubuntu VM running a vulnerable Nextcloud instance. The attack leveraged CVE-2019-11043, a critical PHP-FPM vulnerability, to achieve remote code execution and encrypt sensitive employee data.
+
+### Key Findings
+
+1. **Vulnerable Infrastructure**: PHP 7.1.33 development version susceptible to CVE-2019-11043
+2. **Successful Exploitation**: Remote code execution achieved through nginx/PHP-FPM misconfiguration
+3. **Data Encryption**: Employee files encrypted using AES-256 with hardcoded password `d0nt_cry_n3xt`
+
+### MITRE ATT&CK Framework Mapping
+
+| Tactic | Techniques | Evidence |
+|--------|------------|----------|
+| **Initial Access** | T1190 | CVE-2019-11043 exploitation via nginx logs |
+| **Execution** | T1059.004 | Shell command execution in PHP-FPM context |
+| **Discovery** | T1083, T1057 | File enumeration and system reconnaissance |
+| **Collection** | T1005 | Access to employee and client data files |
+| **Impact** | T1486, T1485 | File encryption and attempted deletion |
+| **Defense Evasion** | T1070.004 | Evidence cleanup attempts |
+
+
+
