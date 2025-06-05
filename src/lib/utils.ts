@@ -16,6 +16,9 @@ export function formatDate(date: Date) {
 }
 
 export function readingTimeMinutes(html: string): number {
+  if (!html || typeof html !== 'string') {
+    return 1 // Default to 1 minute for empty content
+  }
   const textOnly = html.replace(/<[^>]+>/g, '')
   const wordCount = textOnly.split(/\s+/).length
   const readingTimeMinutes = wordCount / 200 + 1

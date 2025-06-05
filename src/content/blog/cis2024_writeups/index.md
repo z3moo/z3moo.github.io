@@ -6,3 +6,16 @@ tags: ['Digital Forensics', 'Incident Response', 'VBA Analysis', 'Linux Forensic
 image: './banner.png'
 ---
 
+# CIS 2024 Forensics Challenges Writeups
+
+This writeup covers my analysis of three cybersecurity challenges from the CIS 2024 competition, focusing on digital forensics and incident response techniques.
+
+## Overview
+
+The challenges included:
+- Linux system compromise analysis
+- Malicious VBA document examination
+- Email-based attack investigation
+
+*Content coming soon...*
+
