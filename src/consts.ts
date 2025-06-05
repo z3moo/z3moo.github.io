@@ -26,6 +26,7 @@ export const NAV_LINKS: Link[] = [
   { href: '/', label: 'home' },
   { href: '/blog', label: 'blog' },
   { href: '/work', label: 'work' },
+  { href: '/certification', label: 'certification' },
 ]
 
 export const SOCIAL_LINKS: Link[] = [

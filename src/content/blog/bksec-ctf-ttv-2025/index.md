@@ -2,7 +2,7 @@
 title: 'BKSEC CTF TTV 2025 Writeups'
 description: 'Writeups for all the CTF challenges I solved during BKSEC CTF TTV 2025'
 date: 2025-03-02
-tags: ['Writeups', 'Forensics', 'Reverse Engineering', 'CTF']
+tags: ['CTF Writeup', 'Digital Forensics', 'Reverse Engineering']
 image: './banner.png'
 ---
 

@@ -1,0 +1,142 @@
+---
+import Breadcrumbs from '@/components/Breadcrumbs.astro'
+import Container from '@/components/Container.astro'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { SITE } from '@/consts'
+import Layout from '@/layouts/Layout.astro'
+import { Icon } from 'astro-icon/components'
+
+const certifications = [
+  {
+    name: "CompTIA Security+",
+    issuer: "CompTIA",
+    status: "In Progress",
+    expectedDate: "2025",
+    description: "Industry-standard certification covering essential cybersecurity skills and knowledge.",
+    badge: "https://images.credly.com/size/340x340/images/74790a75-8451-400a-8536-92d792b5184a/CompTIA_Security_2Bce.png"
+  },
+  {
+    name: "CISSP",
+    issuer: "ISC²",
+    status: "Planned",
+    expectedDate: "2026",
+    description: "Advanced certification for experienced security professionals.",
+    badge: null
+  },
+  {
+    name: "CEH (Certified Ethical Hacker)",
+    issuer: "EC-Council",
+    status: "Planned",
+    expectedDate: "2025",
+    description: "Hands-on certification for penetration testing and ethical hacking.",
+    badge: null
+  }
+]
+---
+
+<Layout title="Certification" description={SITE.DESCRIPTION}>
+  <Container class="flex flex-col gap-y-6">
+    <Breadcrumbs items={[{ label: 'Certification', icon: 'lucide:award' }]} />
+
+    <section>
+      <div class="min-w-full">
+        <h1 class="mb-6 text-2xl font-bold">My Cybersecurity Certifications</h1>
+        <p class="mb-8 text-muted-foreground">
+          As I'm building my career in cybersecurity, I'm working towards obtaining industry-recognized certifications to validate my skills and knowledge.
+        </p>
+
+        <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {certifications.map((cert) => (
+            <Card className="h-full">
+              <CardHeader className="pb-4">
+                <div class="flex items-start justify-between">
+                  <div class="flex-1">
+                    <h3 class="text-lg font-semibold">{cert.name}</h3>
+                    <p class="text-sm text-muted-foreground">{cert.issuer}</p>
+                  </div>
+                  {cert.badge && (
+                    <img 
+                      src={cert.badge} 
+                      alt={`${cert.name} badge`}
+                      class="h-12 w-12 object-contain"
+                    />
+                  )}
+                </div>
+                <div class="flex gap-2">
+                  <Badge 
+                    variant={cert.status === 'In Progress' ? 'default' : 'secondary'}
+                  >
+                    {cert.status}
+                  </Badge>
+                  <Badge variant="outline">
+                    <Icon name="lucide:calendar" class="mr-1 h-3 w-3" />
+                    {cert.expectedDate}
+                  </Badge>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <p class="text-sm text-muted-foreground">
+                  {cert.description}
+                </p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        <div class="mt-12">
+          <h2 class="mb-4 text-xl font-semibold">My Learning Journey</h2>
+          <div class="space-y-4">
+            <Card>
+              <CardContent className="pt-6">
+                <div class="flex items-start gap-4">
+                  <div class="rounded-full bg-primary/10 p-2">
+                    <Icon name="lucide:book-open" class="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h3 class="font-medium">Self-Study & Practical Learning</h3>
+                    <p class="text-sm text-muted-foreground">
+                      Currently studying cybersecurity fundamentals through various resources, hands-on labs, and practical projects.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="pt-6">
+                <div class="flex items-start gap-4">
+                  <div class="rounded-full bg-primary/10 p-2">
+                    <Icon name="lucide:flag" class="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h3 class="font-medium">CTF Participation</h3>
+                    <p class="text-sm text-muted-foreground">
+                      Actively participating in Capture The Flag (CTF) competitions to sharpen my practical cybersecurity skills.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="pt-6">
+                <div class="flex items-start gap-4">
+                  <div class="rounded-full bg-primary/10 p-2">
+                    <Icon name="lucide:shield" class="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h3 class="font-medium">Blue Team Focus</h3>
+                    <p class="text-sm text-muted-foreground">
+                      Specializing in defensive cybersecurity, digital forensics, and incident response capabilities.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+    </section>
+  </Container>
+</Layout>

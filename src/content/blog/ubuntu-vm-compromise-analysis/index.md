@@ -2,13 +2,13 @@
 title: ' Compromised Ubuntu VMAnalysis'
 description: 'Forensic analysis of a compromised Ubuntu virtual machine - investigating attack vectors, persistence mechanisms, and malicious activities'
 date: 2025-05-29
-tags: ['Forensics', 'Incident Response', 'Linux', 'Ubuntu', 'Malware Analysis']
+tags: ['Digital Forensics', 'Incident Response', 'Linux', 'Ubuntu', 'Malware Analysis']
 image: './banner.png'
 ---
 
 ## Introduction
 
-My mentor @teebowie provided me with a `.vdi` file and asked me to investigate what happened and write a comprehensive report about the incident. This document presents my forensic analysis findings (probably)
+My mentor [@teebow1e](https://github.com/teebow1e) provided me with a `.vdi` file and asked me to investigate what happened and write a comprehensive report about the incident. This document presents my forensic analysis findings (probably)
 
 ## Thought Process
 
@@ -500,6 +500,3 @@ This forensic analysis uncovered a sophisticated cyberattack against an Ubuntu V
 | **Collection** | T1005 | Access to employee and client data files |
 | **Impact** | T1486, T1485 | File encryption and attempted deletion |
 | **Defense Evasion** | T1070.004 | Evidence cleanup attempts |
-
-
-
