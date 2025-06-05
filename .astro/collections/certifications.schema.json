@@ -1,0 +1,85 @@
+{
+  "$ref": "#/definitions/certifications",
+  "definitions": {
+    "certifications": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "issuer": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "score": {
+          "type": "string"
+        },
+        "date": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "badge": {
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "not": {}
+                },
+                {
+                  "type": "string",
+                  "format": "uri"
+                }
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "certificateLink": {
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "not": {}
+                },
+                {
+                  "type": "string",
+                  "format": "uri"
+                }
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "image": {
+          "type": "string"
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "$schema": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "title",
+        "issuer",
+        "status",
+        "date",
+        "description"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

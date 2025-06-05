@@ -1,0 +1,100 @@
+---
+import { getCollection, type CollectionEntry, render } from 'astro:content'
+import Breadcrumbs from '@/components/Breadcrumbs.astro'
+import Container from '@/components/Container.astro'
+import { Badge } from '@/components/ui/badge'
+import { Card, CardHeader } from '@/components/ui/card'
+import Layout from '@/layouts/Layout.astro'
+import { Icon } from 'astro-icon/components'
+
+export async function getStaticPaths() {
+  const certifications = await getCollection('certifications')
+  return certifications.map((cert) => ({
+    params: { id: cert.id },
+    props: { cert },
+  }))
+}
+
+interface Props {
+  cert: CollectionEntry<'certifications'>
+}
+
+const { cert } = Astro.props
+const { Content } = await render(cert)
+---
+
+<Layout title={cert.data.title} description={cert.data.description}>
+  <Container class="flex flex-col gap-y-6">
+    <Breadcrumbs 
+      items={[
+        { label: 'Certification', href: '/certification', icon: 'lucide:award' },
+        { label: cert.data.title, icon: 'lucide:file-text' }
+      ]} 
+    />
+
+    <section>
+      <div class="min-w-full">
+        <!-- Header Card -->
+        <Card className="mb-8">
+          <CardHeader>
+            <div class="flex flex-col gap-4">
+              <div class="flex items-start justify-between">
+                <div class="flex-1">
+                  <h1 class="text-3xl font-bold mb-2">{cert.data.title}</h1>
+                  <p class="text-lg text-muted-foreground">{cert.data.issuer}</p>
+                </div>
+                {cert.data.badge && (
+                  <img 
+                    src={cert.data.badge} 
+                    alt={`${cert.data.title} badge`}
+                    class="h-16 w-16 object-contain"
+                  />
+                )}
+              </div>
+              
+              <div class="flex gap-2 flex-wrap">
+                <Badge variant="default">
+                  {cert.data.status}
+                </Badge>
+                {cert.data.score && (
+                  <Badge variant="outline">
+                    <Icon name="lucide:trophy" class="mr-1 h-3 w-3" />
+                    {cert.data.score}
+                  </Badge>
+                )}
+                <Badge variant="outline">
+                  <Icon name="lucide:calendar" class="mr-1 h-3 w-3" />
+                  {cert.data.date}
+                </Badge>
+                {cert.data.tags?.map((tag) => (
+                  <Badge variant="secondary">
+                    {tag}
+                  </Badge>
+                ))}
+              </div>
+
+              {cert.data.certificateLink && (
+                <div class="pt-2">
+                  <a 
+                    href={cert.data.certificateLink} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    class="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
+                  >
+                    <Icon name="lucide:external-link" class="h-4 w-4" />
+                    View Certificate
+                  </a>
+                </div>
+              )}
+            </div>
+          </CardHeader>
+        </Card>
+
+        <!-- Content -->
+        <article class="prose prose-neutral dark:prose-invert max-w-none">
+          <Content />
+        </article>
+      </div>
+    </section>
+  </Container>
+</Layout>
