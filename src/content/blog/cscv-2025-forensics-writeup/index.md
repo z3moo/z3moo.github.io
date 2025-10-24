@@ -1,5 +1,5 @@
 ---
-title: 'CSCV 2025: Digital Forensics & Incident Response Challenge Writeup'
+title: 'CSCV 2025: Forensics Challenge Writeup'
 description: 'Complete writeup for CSCV 2025 forensics challenges'
 date: 2025-10-22
 tags: ['forensics', 'incident-response', 'linux', 'ubuntu', 'malware', 'threat-hunting']
