@@ -951,8 +951,6 @@ Out of the entire list of IP addresses, two stood out: `192.168.192.1` and `192.
 
 `ip.addr == 192.168.192.1 and ip.addr == 192.168.203.91`
 
-![alt text](<../../../assets/images/CSCV-2025/CovertS/image copy 6.png>)
-
 Upon closer inspection, I noticed the last packet contained the string `==` at the end. This suggested the data was Base64-encoded and transmitted via the 2-byte checksum field at the end of each packet.
 
 ![alt text](<../../../assets/images/CSCV-2025/CovertS/image copy 7.png>)
