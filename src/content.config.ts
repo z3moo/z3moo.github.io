@@ -70,4 +70,21 @@ const certifications = defineCollection({
     }),
 })
 
-export const collections = { blog, authors, projects, certifications }
+const htb = defineCollection({
+  loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/htb' }),
+  schema: ({ image }) =>
+    z.object({
+      title: z.string(),
+      issuer: z.string(),
+      status: z.string(),
+      score: z.string().optional(),
+      date: z.string(),
+      description: z.string(),
+      badge: z.string().url().optional().nullable(),
+      certificateLink: z.string().url().optional().nullable(),
+      image: image().optional(),
+      tags: z.array(z.string()).optional(),
+    }),
+})
+
+export const collections = { blog, authors, projects, certifications, htb }

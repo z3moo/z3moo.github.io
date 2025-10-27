@@ -2,7 +2,7 @@
 title: 'ASCIS 2024 - Urgent Tina Challenge Writeups'
 description: 'Writeups for Urgent Tina Forensics Challenge (ASEAN Student Contest on Information Security)'
 date: 2025-04-04
-tags: ['Digital Forensics', 'Malware Forensics', 'CTF Writeup', 'ASCIS', 'MITRE ATT&CK']
+tags: ['forensics', 'malware forensics', 'ctf', 'ASCIS', 'MITRE ATT&CK']
 image: './banner.jpg'
 ---
 
