@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils'
 const iconMap = {
   home: () => <Home className="h-5 w-5" />,
   blog: () => <Archive className="h-5 w-5" />,
-  htb: () => <Shield className="h-5 w-5" />,
+  HTB: () => <Shield className="h-5 w-5" />,
   work: () => <Briefcase className="h-5 w-5" />,
   certification: () => <Award className="h-5 w-5" />,
 } as Record<string, () => JSX.Element>
