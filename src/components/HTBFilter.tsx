@@ -2,7 +2,6 @@ import { useState, useMemo } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
-import { Icon } from 'lucide-react'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,7 +11,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu'
-import { ChevronDown, Filter, ArrowUpDown, ArrowRight } from 'lucide-react'
+import { ChevronDown, Filter, ArrowUpDown, ArrowRight, Zap, Calendar } from 'lucide-react'
 
 type HTBItem = {
   id: string
@@ -199,13 +198,13 @@ export default function HTBFilter({ items }: HTBFilterProps) {
                     {item.data.status}
                   </Badge>
                   {item.data.difficulty && (
-                    <Badge variant="outline">
-                      <Icon iconNode={[]} className="mr-1 h-3 w-3" />
+                    <Badge variant="outline" className="gap-1">
+                      <Zap className="h-3 w-3" />
                       {item.data.difficulty}
                     </Badge>
                   )}
-                  <Badge variant="outline">
-                    <Icon iconNode={[]} className="mr-1 h-3 w-3" />
+                  <Badge variant="outline" className="gap-1">
+                    <Calendar className="h-3 w-3" />
                     {item.data.date}
                   </Badge>
                 </div>
