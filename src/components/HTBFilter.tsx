@@ -1,6 +1,8 @@
 import { useState, useMemo } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { Icon } from 'lucide-react'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,7 +12,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu'
-import { ChevronDown, Filter, ArrowUpDown } from 'lucide-react'
+import { ChevronDown, Filter, ArrowUpDown, ArrowRight } from 'lucide-react'
 
 type HTBItem = {
   id: string
@@ -20,6 +22,7 @@ type HTBItem = {
     status: string
     difficulty?: 'Very Easy' | 'Easy' | 'Medium' | 'Hard' | 'Insane'
     date: string
+    description?: string
     badge?: string | null
     certificateLink?: string | null
     tags?: string[]
@@ -28,7 +31,6 @@ type HTBItem = {
 
 type HTBFilterProps = {
   items: HTBItem[]
-  children: (filteredItems: HTBItem[]) => React.ReactNode
 }
 
 const difficultyOrder = {
@@ -39,7 +41,7 @@ const difficultyOrder = {
   'Insane': 5,
 }
 
-export default function HTBFilter({ items, children }: HTBFilterProps) {
+export default function HTBFilter({ items }: HTBFilterProps) {
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>('all')
   const [sortBy, setSortBy] = useState<string>('date-desc')
 
@@ -174,7 +176,57 @@ export default function HTBFilter({ items, children }: HTBFilterProps) {
       </div>
 
       {/* Render filtered items */}
-      {children(filteredAndSortedItems)}
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
+        {filteredAndSortedItems.map((item) => (
+          <a key={item.id} href={`/htb/${item.id}`} className="block group">
+            <Card className="h-full transition-all duration-200 group-hover:shadow-lg group-hover:scale-[1.02]">
+              <CardHeader className="pb-4">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <h3 className="text-lg font-semibold group-hover:text-primary transition-colors">{item.data.title}</h3>
+                    <p className="text-sm text-muted-foreground">{item.data.issuer}</p>
+                  </div>
+                  {item.data.badge && (
+                    <img 
+                      src={item.data.badge} 
+                      alt={`${item.data.title} badge`}
+                      className="h-12 w-12 object-contain"
+                    />
+                  )}
+                </div>
+                <div className="flex gap-2 flex-wrap">
+                  <Badge variant={item.data.status === 'Completed' ? 'default' : 'secondary'}>
+                    {item.data.status}
+                  </Badge>
+                  {item.data.difficulty && (
+                    <Badge variant="outline">
+                      <Icon iconNode={[]} className="mr-1 h-3 w-3" />
+                      {item.data.difficulty}
+                    </Badge>
+                  )}
+                  <Badge variant="outline">
+                    <Icon iconNode={[]} className="mr-1 h-3 w-3" />
+                    {item.data.date}
+                  </Badge>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {item.data.description && (
+                  <p className="text-sm text-muted-foreground mb-4">
+                    {item.data.description}
+                  </p>
+                )}
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-primary font-medium group-hover:underline">
+                    Read more
+                  </span>
+                  <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
+                </div>
+              </CardContent>
+            </Card>
+          </a>
+        ))}
+      </div>
     </div>
   )
 }
