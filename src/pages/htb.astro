@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { SITE } from '@/consts'
 import Layout from '@/layouts/Layout.astro'
 import { Icon } from 'astro-icon/components'
+import HTBFilters from '@/components/HTBFilters.astro'
 
 const htbItems = await getCollection('htb')
 // Sort by date, newest first
@@ -24,9 +25,19 @@ htbItems.sort((a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).
           A collection of my HackTheBox achievements and milestones.
         </p>
 
+        <HTBFilters items={htbItems} />
+
         <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
           {htbItems.map((item) => (
-            <a href={`/htb/${item.id}`} class="block group">
+            <a 
+              href={`/htb/${item.id}`} 
+              class="block group"
+              data-htb-card
+              data-category={item.data.category || ''}
+              data-difficulty={item.data.difficulty || ''}
+              data-date={item.data.date}
+              data-title={item.data.title}
+            >
               <Card className="h-full transition-all duration-200 group-hover:shadow-lg group-hover:scale-[1.02]">
                 <CardHeader className="pb-4">
                   <div class="flex items-start justify-between">
@@ -46,6 +57,12 @@ htbItems.sort((a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).
                     <Badge variant={item.data.status === 'Completed' ? 'default' : 'secondary'}>
                       {item.data.status}
                     </Badge>
+                    {item.data.category && (
+                      <Badge variant="outline">
+                        <Icon name="lucide:folder" class="mr-1 h-3 w-3" />
+                        {item.data.category}
+                      </Badge>
+                    )}
                     {item.data.difficulty && (
                       <Badge variant="outline">
                         <Icon name="lucide:zap" class="mr-1 h-3 w-3" />

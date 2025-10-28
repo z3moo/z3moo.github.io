@@ -1,0 +1,115 @@
+---
+// Simple client-side filtering using vanilla JS, no React
+const { items } = Astro.props
+---
+
+<div id="htb-filters" class="mb-6 space-y-4">
+  <div class="flex flex-wrap gap-3 items-center">
+    <span class="text-sm font-medium">Filter by:</span>
+    
+    <select id="category-filter" class="rounded-md border border-input bg-background px-3 py-2 text-sm">
+      <option value="all">All Categories</option>
+      <option value="Forensics">Forensics</option>
+      <option value="Web">Web</option>
+      <option value="Pwn">Pwn</option>
+      <option value="Crypto">Crypto</option>
+      <option value="Reversing">Reversing</option>
+      <option value="Misc">Misc</option>
+      <option value="Hardware">Hardware</option>
+      <option value="Mobile">Mobile</option>
+      <option value="OSINT">OSINT</option>
+    </select>
+
+    <select id="difficulty-filter" class="rounded-md border border-input bg-background px-3 py-2 text-sm">
+      <option value="all">All Difficulties</option>
+      <option value="Very Easy">Very Easy</option>
+      <option value="Easy">Easy</option>
+      <option value="Medium">Medium</option>
+      <option value="Hard">Hard</option>
+      <option value="Insane">Insane</option>
+    </select>
+
+    <select id="sort-by" class="rounded-md border border-input bg-background px-3 py-2 text-sm ml-auto">
+      <option value="date-desc">Newest First</option>
+      <option value="date-asc">Oldest First</option>
+      <option value="title-asc">Title A-Z</option>
+      <option value="title-desc">Title Z-A</option>
+    </select>
+  </div>
+
+  <div id="results-count" class="text-sm text-muted-foreground"></div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const categoryFilter = document.getElementById('category-filter') as HTMLSelectElement
+    const difficultyFilter = document.getElementById('difficulty-filter') as HTMLSelectElement
+    const sortBy = document.getElementById('sort-by') as HTMLSelectElement
+    const resultsCount = document.getElementById('results-count')
+    const cards = Array.from(document.querySelectorAll('[data-htb-card]'))
+
+    function updateDisplay() {
+      const categoryValue = categoryFilter.value
+      const difficultyValue = difficultyFilter.value
+      const sortValue = sortBy.value
+
+      // Filter cards
+      let visibleCards = cards.filter(card => {
+        const el = card as HTMLElement
+        const category = el.dataset.category
+        const difficulty = el.dataset.difficulty
+
+        const categoryMatch = categoryValue === 'all' || category === categoryValue
+        const difficultyMatch = difficultyValue === 'all' || difficulty === difficultyValue
+
+        return categoryMatch && difficultyMatch
+      })
+
+      // Sort cards
+      visibleCards.sort((a, b) => {
+        const elA = a as HTMLElement
+        const elB = b as HTMLElement
+
+        switch (sortValue) {
+          case 'date-desc':
+            return new Date(elB.dataset.date || '').getTime() - new Date(elA.dataset.date || '').getTime()
+          case 'date-asc':
+            return new Date(elA.dataset.date || '').getTime() - new Date(elB.dataset.date || '').getTime()
+          case 'title-asc':
+            return (elA.dataset.title || '').localeCompare(elB.dataset.title || '')
+          case 'title-desc':
+            return (elB.dataset.title || '').localeCompare(elA.dataset.title || '')
+          default:
+            return 0
+        }
+      })
+
+      // Hide all cards first
+      cards.forEach(card => {
+        (card as HTMLElement).style.display = 'none'
+      })
+
+      // Show and reorder visible cards
+      const container = cards[0]?.parentElement
+      if (container) {
+        visibleCards.forEach(card => {
+          (card as HTMLElement).style.display = 'block'
+          container.appendChild(card)
+        })
+      }
+
+      // Update count
+      if (resultsCount) {
+        resultsCount.textContent = `Showing ${visibleCards.length} of ${cards.length} ${visibleCards.length === 1 ? 'item' : 'items'}`
+      }
+    }
+
+    // Add event listeners
+    categoryFilter.addEventListener('change', updateDisplay)
+    difficultyFilter.addEventListener('change', updateDisplay)
+    sortBy.addEventListener('change', updateDisplay)
+
+    // Initial display
+    updateDisplay()
+  })
+</script>

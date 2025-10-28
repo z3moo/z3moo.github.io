@@ -13,6 +13,20 @@
         "status": {
           "type": "string"
         },
+        "category": {
+          "type": "string",
+          "enum": [
+            "Forensics",
+            "Web",
+            "Pwn",
+            "Crypto",
+            "Reversing",
+            "Misc",
+            "Hardware",
+            "Mobile",
+            "OSINT"
+          ]
+        },
         "difficulty": {
           "type": "string",
           "enum": [

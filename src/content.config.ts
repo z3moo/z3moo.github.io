@@ -77,6 +77,7 @@ const htb = defineCollection({
       title: z.string(),
       issuer: z.string(),
       status: z.string(),
+      category: z.enum(['Forensics', 'Web', 'Pwn', 'Crypto', 'Reversing', 'Misc', 'Hardware', 'Mobile', 'OSINT']).optional(),
       difficulty: z.enum(['Very Easy', 'Easy', 'Medium', 'Hard', 'Insane']).optional(),
       score: z.string().optional(),
       date: z.string(),

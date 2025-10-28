@@ -56,6 +56,12 @@ const { Content } = await render(item)
                 <Badge variant="default">
                   {item.data.status}
                 </Badge>
+                {item.data.category && (
+                  <Badge variant="outline">
+                    <Icon name="lucide:folder" class="mr-1 h-3 w-3" />
+                    {item.data.category}
+                  </Badge>
+                )}
                 {item.data.difficulty && (
                   <Badge variant="outline">
                     <Icon name="lucide:zap" class="mr-1 h-3 w-3" />
