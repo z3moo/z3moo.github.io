@@ -23,7 +23,7 @@ const { item } = Astro.props
 const { Content } = await render(item)
 ---
 
-<Layout title={item.data.title} description={item.data.description}>
+<Layout title={item.data.title} description={item.data.description || item.data.title}>
   <Container class="flex flex-col gap-y-6">
     <Breadcrumbs 
       items={[
