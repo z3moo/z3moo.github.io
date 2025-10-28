@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { SITE } from '@/consts'
 import Layout from '@/layouts/Layout.astro'
 import { Icon } from 'astro-icon/components'
+import HTBFilter from '@/components/HTBFilter'
 
 const htbItems = await getCollection('htb')
 ---
@@ -22,8 +23,10 @@ const htbItems = await getCollection('htb')
         Writeups for HTB Challenges, Machines, and Sherlock  I've solved.
         </p>
 
-        <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
-          {htbItems.map((item) => (
+        <HTBFilter client:load items={htbItems}>
+          {(filteredItems: any) => (
+            <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
+              {filteredItems.map((item: any) => (
             <a href={`/htb/${item.id}`} class="block group">
               <Card className="h-full transition-all duration-200 group-hover:shadow-lg group-hover:scale-[1.02]">
                 <CardHeader className="pb-4">
@@ -46,6 +49,12 @@ const htbItems = await getCollection('htb')
                     >
                       {item.data.status}
                     </Badge>
+                    {item.data.difficulty && (
+                      <Badge variant="outline">
+                        <Icon name="lucide:zap" class="mr-1 h-3 w-3" />
+                        {item.data.difficulty}
+                      </Badge>
+                    )}
                     {item.data.score && (
                       <Badge variant="outline">
                         <Icon name="lucide:trophy" class="mr-1 h-3 w-3" />
@@ -59,9 +68,11 @@ const htbItems = await getCollection('htb')
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <p class="text-sm text-muted-foreground mb-4">
-                    {item.data.description}
-                  </p>
+                  {item.data.description && (
+                    <p class="text-sm text-muted-foreground mb-4">
+                      {item.data.description}
+                    </p>
+                  )}
                   <div class="flex items-center justify-between">
                     <span class="text-sm text-primary font-medium group-hover:underline">
                       Read more
@@ -71,8 +82,10 @@ const htbItems = await getCollection('htb')
                 </CardContent>
               </Card>
             </a>
-          ))}
-        </div>
+              ))}
+            </div>
+          )}
+        </HTBFilter>
       </div>
     </section>
   </Container>
