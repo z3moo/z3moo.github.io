@@ -7,34 +7,75 @@ import { Badge } from '@/components/ui/badge'
 import { SITE } from '@/consts'
 import Layout from '@/layouts/Layout.astro'
 import { Icon } from 'astro-icon/components'
-import HTBFilter from '@/components/HTBFilter'
 
 const htbItems = await getCollection('htb')
----
-
----
-import { getCollection } from 'astro:content'
-import Layout from '@/layouts/Layout.astro'
-import Container from '@/components/Container.astro'
-import HTBFilter from '@/components/HTBFilter'
-
-const htbItems = await getCollection('htb')
+// Sort by date, newest first
+htbItems.sort((a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime())
 ---
 
 <Layout title="HTB Achievements" description="A collection of my HackTheBox achievements and milestones.">
-  <Container>
-    <div class="space-y-10">
-      <div class="flex items-center justify-between">
-        <div class="flex flex-col gap-1">
-          <h1 class="font-serif text-4xl">HTB Achievements</h1>
-          <p class="text-muted-foreground">
-            A collection of my HackTheBox achievements and milestones.
-          </p>
+  <Container class="flex flex-col gap-y-6">
+    <Breadcrumbs items={[{ label: 'HTB', icon: 'lucide:shield' }]} />
+
+    <section>
+      <div class="min-w-full">
+        <h1 class="mb-6 text-2xl font-bold">HTB Achievements</h1>
+        <p class="mb-8 text-muted-foreground">
+          A collection of my HackTheBox achievements and milestones.
+        </p>
+
+        <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
+          {htbItems.map((item) => (
+            <a href={`/htb/${item.id}`} class="block group">
+              <Card className="h-full transition-all duration-200 group-hover:shadow-lg group-hover:scale-[1.02]">
+                <CardHeader className="pb-4">
+                  <div class="flex items-start justify-between">
+                    <div class="flex-1">
+                      <h3 class="text-lg font-semibold group-hover:text-primary transition-colors">{item.data.title}</h3>
+                      <p class="text-sm text-muted-foreground">{item.data.issuer}</p>
+                    </div>
+                    {item.data.badge && (
+                      <img 
+                        src={item.data.badge} 
+                        alt={`${item.data.title} badge`}
+                        class="h-12 w-12 object-contain"
+                      />
+                    )}
+                  </div>
+                  <div class="flex gap-2 flex-wrap">
+                    <Badge variant={item.data.status === 'Completed' ? 'default' : 'secondary'}>
+                      {item.data.status}
+                    </Badge>
+                    {item.data.difficulty && (
+                      <Badge variant="outline">
+                        <Icon name="lucide:zap" class="mr-1 h-3 w-3" />
+                        {item.data.difficulty}
+                      </Badge>
+                    )}
+                    <Badge variant="outline">
+                      <Icon name="lucide:calendar" class="mr-1 h-3 w-3" />
+                      {item.data.date}
+                    </Badge>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  {item.data.description && (
+                    <p class="text-sm text-muted-foreground mb-4">
+                      {item.data.description}
+                    </p>
+                  )}
+                  <div class="flex items-center justify-between">
+                    <span class="text-sm text-primary font-medium group-hover:underline">
+                      Read more
+                    </span>
+                    <Icon name="lucide:arrow-right" class="h-4 w-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
+                  </div>
+                </CardContent>
+              </Card>
+            </a>
+          ))}
         </div>
       </div>
-
-      <!-- Filter Component with Client-Side Interactivity -->
-      <HTBFilter client:load items={htbItems} />
-    </div>
+    </section>
   </Container>
 </Layout>

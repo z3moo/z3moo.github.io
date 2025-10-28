@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import * as React from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
@@ -41,10 +41,10 @@ const difficultyOrder = {
 }
 
 export default function HTBFilter({ items }: HTBFilterProps) {
-  const [selectedDifficulty, setSelectedDifficulty] = useState<string>('all')
-  const [sortBy, setSortBy] = useState<string>('date-desc')
+  const [selectedDifficulty, setSelectedDifficulty] = React.useState<string>('all')
+  const [sortBy, setSortBy] = React.useState<string>('date-desc')
 
-  const difficulties = useMemo(() => {
+  const difficulties = React.useMemo(() => {
     const diffs = new Set<string>()
     items.forEach((item) => {
       if (item.data.difficulty) {
@@ -56,7 +56,7 @@ export default function HTBFilter({ items }: HTBFilterProps) {
     )
   }, [items])
 
-  const filteredAndSortedItems = useMemo(() => {
+  const filteredAndSortedItems = React.useMemo(() => {
     let result = [...items]
 
     // Filter by difficulty
