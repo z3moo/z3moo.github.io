@@ -196,4 +196,4 @@ However, I was still missing the third part of the flag. I noticed in the traffi
 
 Decoding the blob revealed the final part of the flag.
 
-![alt text](<../../assets/images/HTB/Data-Siege/image copy 9.png>)
+![alt text](<../../assets/images/HTB/Data-Siege/image copy 9.png>)  
