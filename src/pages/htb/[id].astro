@@ -2,6 +2,7 @@
 import { getCollection, type CollectionEntry, render } from 'astro:content'
 import Breadcrumbs from '@/components/Breadcrumbs.astro'
 import Container from '@/components/Container.astro'
+import TableOfContents from '@/components/TableOfContents.astro'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardHeader } from '@/components/ui/card'
 import Layout from '@/layouts/Layout.astro'
@@ -20,7 +21,7 @@ interface Props {
 }
 
 const { item } = Astro.props
-const { Content } = await render(item)
+const { Content, headings } = await render(item)
 ---
 
 <Layout title={item.data.title} description={item.data.description || item.data.title}>
@@ -101,6 +102,8 @@ const { Content } = await render(item)
             </div>
           </CardHeader>
         </Card>
+
+        {headings.length > 0 && <TableOfContents headings={headings} />}
 
         <!-- Content -->
         <article class="prose prose-neutral dark:prose-invert max-w-none">
