@@ -41,16 +41,18 @@ const { items } = Astro.props
 </div>
 
 <script>
+  let filtersInitialized = false
+
   function initializeFilters() {
     const categoryFilter = document.getElementById('category-filter') as HTMLSelectElement
     const difficultyFilter = document.getElementById('difficulty-filter') as HTMLSelectElement
     const sortBy = document.getElementById('sort-by') as HTMLSelectElement
     const resultsCount = document.getElementById('results-count')
-    const cards = Array.from(document.querySelectorAll('[data-htb-card]'))
 
     if (!categoryFilter || !difficultyFilter || !sortBy) return
 
     function updateDisplay() {
+      const cards = Array.from(document.querySelectorAll('[data-htb-card]'))
       const categoryValue = categoryFilter.value
       const difficultyValue = difficultyFilter.value
       const sortValue = sortBy.value
@@ -106,31 +108,27 @@ const { items } = Astro.props
       }
     }
 
-    // Remove existing listeners to avoid duplicates
-    const newCategoryFilter = categoryFilter.cloneNode(true) as HTMLSelectElement
-    const newDifficultyFilter = difficultyFilter.cloneNode(true) as HTMLSelectElement
-    const newSortBy = sortBy.cloneNode(true) as HTMLSelectElement
-    
-    categoryFilter.parentNode?.replaceChild(newCategoryFilter, categoryFilter)
-    difficultyFilter.parentNode?.replaceChild(newDifficultyFilter, difficultyFilter)
-    sortBy.parentNode?.replaceChild(newSortBy, sortBy)
+    // Only add listeners once
+    if (!filtersInitialized) {
+      categoryFilter.addEventListener('change', updateDisplay)
+      difficultyFilter.addEventListener('change', updateDisplay)
+      sortBy.addEventListener('change', updateDisplay)
+      filtersInitialized = true
+    }
 
-    // Add event listeners
-    newCategoryFilter.addEventListener('change', updateDisplay)
-    newDifficultyFilter.addEventListener('change', updateDisplay)
-    newSortBy.addEventListener('change', updateDisplay)
-
-    // Initial display
+    // Always update display when initializing
     updateDisplay()
   }
 
   // Initialize on page load
-  document.addEventListener('DOMContentLoaded', initializeFilters)
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeFilters)
+  } else {
+    initializeFilters()
+  }
   
   // Re-initialize when navigating back (bfcache)
   window.addEventListener('pageshow', (event) => {
-    if (event.persisted) {
-      initializeFilters()
-    }
+    initializeFilters()
   })
 </script>
