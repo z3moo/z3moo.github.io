@@ -40,16 +40,16 @@ const { items } = Astro.props
   <div id="results-count" class="text-sm text-muted-foreground"></div>
 </div>
 
-<script>
-  let filtersInitialized = false
-
-  function initializeFilters() {
-    const categoryFilter = document.getElementById('category-filter') as HTMLSelectElement
-    const difficultyFilter = document.getElementById('difficulty-filter') as HTMLSelectElement
-    const sortBy = document.getElementById('sort-by') as HTMLSelectElement
+<script is:inline>
+  function setupHTBFilters() {
+    const categoryFilter = document.getElementById('category-filter')
+    const difficultyFilter = document.getElementById('difficulty-filter')
+    const sortBy = document.getElementById('sort-by')
     const resultsCount = document.getElementById('results-count')
 
-    if (!categoryFilter || !difficultyFilter || !sortBy) return
+    if (!categoryFilter || !difficultyFilter || !sortBy) {
+      return
+    }
 
     function updateDisplay() {
       const cards = Array.from(document.querySelectorAll('[data-htb-card]'))
@@ -59,7 +59,7 @@ const { items } = Astro.props
 
       // Filter cards
       let visibleCards = cards.filter(card => {
-        const el = card as HTMLElement
+        const el = card
         const category = el.dataset.category
         const difficulty = el.dataset.difficulty
 
@@ -71,8 +71,8 @@ const { items } = Astro.props
 
       // Sort cards
       visibleCards.sort((a, b) => {
-        const elA = a as HTMLElement
-        const elB = b as HTMLElement
+        const elA = a
+        const elB = b
 
         switch (sortValue) {
           case 'date-desc':
@@ -90,14 +90,14 @@ const { items } = Astro.props
 
       // Hide all cards first
       cards.forEach(card => {
-        (card as HTMLElement).style.display = 'none'
+        card.style.display = 'none'
       })
 
       // Show and reorder visible cards
       const container = cards[0]?.parentElement
       if (container) {
         visibleCards.forEach(card => {
-          (card as HTMLElement).style.display = 'block'
+          card.style.display = 'block'
           container.appendChild(card)
         })
       }
@@ -108,27 +108,27 @@ const { items } = Astro.props
       }
     }
 
-    // Only add listeners once
-    if (!filtersInitialized) {
-      categoryFilter.addEventListener('change', updateDisplay)
-      difficultyFilter.addEventListener('change', updateDisplay)
-      sortBy.addEventListener('change', updateDisplay)
-      filtersInitialized = true
-    }
+    // Remove old listeners if they exist
+    const newCategoryFilter = categoryFilter.cloneNode(true)
+    const newDifficultyFilter = difficultyFilter.cloneNode(true)
+    const newSortBy = sortBy.cloneNode(true)
+    
+    categoryFilter.parentNode.replaceChild(newCategoryFilter, categoryFilter)
+    difficultyFilter.parentNode.replaceChild(newDifficultyFilter, difficultyFilter)
+    sortBy.parentNode.replaceChild(newSortBy, sortBy)
 
-    // Always update display when initializing
+    // Add event listeners to new elements
+    newCategoryFilter.addEventListener('change', updateDisplay)
+    newDifficultyFilter.addEventListener('change', updateDisplay)
+    newSortBy.addEventListener('change', updateDisplay)
+
+    // Initial display
     updateDisplay()
   }
 
-  // Initialize on page load
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initializeFilters)
-  } else {
-    initializeFilters()
-  }
-  
-  // Re-initialize when navigating back (bfcache)
-  window.addEventListener('pageshow', (event) => {
-    initializeFilters()
-  })
+  // Run on initial page load
+  setupHTBFilters()
+
+  // Run after Astro page transitions
+  document.addEventListener('astro:page-load', setupHTBFilters)
 </script>
