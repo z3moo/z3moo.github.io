@@ -40,11 +40,14 @@ const { items } = Astro.props
   <div id="results-count" class="text-sm text-muted-foreground"></div>
 </div>
 
-<script is:inline>
+<script>
+  document.addEventListener('DOMContentLoaded', setupHTBFilters)
+  document.addEventListener('astro:page-load', setupHTBFilters)
+
   function setupHTBFilters() {
-    const categoryFilter = document.getElementById('category-filter')
-    const difficultyFilter = document.getElementById('difficulty-filter')
-    const sortBy = document.getElementById('sort-by')
+    const categoryFilter = document.getElementById('category-filter') as HTMLSelectElement
+    const difficultyFilter = document.getElementById('difficulty-filter') as HTMLSelectElement
+    const sortBy = document.getElementById('sort-by') as HTMLSelectElement
     const resultsCount = document.getElementById('results-count')
 
     if (!categoryFilter || !difficultyFilter || !sortBy) {
@@ -52,16 +55,15 @@ const { items } = Astro.props
     }
 
     function updateDisplay() {
-      const cards = Array.from(document.querySelectorAll('[data-htb-card]'))
+      const cards = Array.from(document.querySelectorAll('[data-htb-card]')) as HTMLElement[]
       const categoryValue = categoryFilter.value
       const difficultyValue = difficultyFilter.value
       const sortValue = sortBy.value
 
       // Filter cards
       let visibleCards = cards.filter(card => {
-        const el = card
-        const category = el.dataset.category
-        const difficulty = el.dataset.difficulty
+        const category = card.dataset.category
+        const difficulty = card.dataset.difficulty
 
         const categoryMatch = categoryValue === 'all' || category === categoryValue
         const difficultyMatch = difficultyValue === 'all' || difficulty === difficultyValue
@@ -71,18 +73,15 @@ const { items } = Astro.props
 
       // Sort cards
       visibleCards.sort((a, b) => {
-        const elA = a
-        const elB = b
-
         switch (sortValue) {
           case 'date-desc':
-            return new Date(elB.dataset.date || '').getTime() - new Date(elA.dataset.date || '').getTime()
+            return new Date(b.dataset.date || '').getTime() - new Date(a.dataset.date || '').getTime()
           case 'date-asc':
-            return new Date(elA.dataset.date || '').getTime() - new Date(elB.dataset.date || '').getTime()
+            return new Date(a.dataset.date || '').getTime() - new Date(b.dataset.date || '').getTime()
           case 'title-asc':
-            return (elA.dataset.title || '').localeCompare(elB.dataset.title || '')
+            return (a.dataset.title || '').localeCompare(b.dataset.title || '')
           case 'title-desc':
-            return (elB.dataset.title || '').localeCompare(elA.dataset.title || '')
+            return (b.dataset.title || '').localeCompare(a.dataset.title || '')
           default:
             return 0
         }
@@ -108,27 +107,12 @@ const { items } = Astro.props
       }
     }
 
-    // Remove old listeners if they exist
-    const newCategoryFilter = categoryFilter.cloneNode(true)
-    const newDifficultyFilter = difficultyFilter.cloneNode(true)
-    const newSortBy = sortBy.cloneNode(true)
-    
-    categoryFilter.parentNode.replaceChild(newCategoryFilter, categoryFilter)
-    difficultyFilter.parentNode.replaceChild(newDifficultyFilter, difficultyFilter)
-    sortBy.parentNode.replaceChild(newSortBy, sortBy)
-
-    // Add event listeners to new elements
-    newCategoryFilter.addEventListener('change', updateDisplay)
-    newDifficultyFilter.addEventListener('change', updateDisplay)
-    newSortBy.addEventListener('change', updateDisplay)
+    // Add event listeners
+    categoryFilter.addEventListener('change', updateDisplay)
+    difficultyFilter.addEventListener('change', updateDisplay)
+    sortBy.addEventListener('change', updateDisplay)
 
     // Initial display
     updateDisplay()
   }
-
-  // Run on initial page load
-  setupHTBFilters()
-
-  // Run after Astro page transitions
-  document.addEventListener('astro:page-load', setupHTBFilters)
 </script>
