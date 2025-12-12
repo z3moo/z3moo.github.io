@@ -48,7 +48,9 @@ I spotted another base64 blob, which decoded to reveal the flag.
 
 ![alt text](<../../../assets/images/cyber-apocalypse-2025/a-new-hire/image copy 7.png>)
 
-Flag: `HTB{4PT_28_4nd_m1cr0s0ft_s34rch=1n1t14l_4cc3s!!}`
+```
+HTB{4PT_28_4nd_m1cr0s0ft_s34rch=1n1t14l_4cc3s!!}
+```
 
 ## Thorin's Amulet
 
@@ -95,7 +97,9 @@ Decoding the hex string revealed the flag.
 
 ![alt text](<../../../assets/images/cyber-apocalypse-2025/thorins amulet/image copy.png>)
 
-Flag: `HTB{7h0R1N_H45_4lW4Y5_833n_4N_9r347_1NV3n70r}`
+```
+HTB{7h0R1N_H45_4lW4Y5_833n_4N_9r347_1NV3n70r}
+```
 
 ## Stealth Invasion
 
@@ -737,7 +741,9 @@ with open("map.pdf", "wb") as f:
 
 ![alt text](<../../../assets/images/cyber-apocalypse-2025/cave-expedition/image copy 7.png>)
 
-Flag: `HTB{Dunl0rn_dRAk3_LA1r_15_n0W_5AF3}`
+```
+HTB{Dunl0rn_dRAk3_LA1r_15_n0W_5AF3}
+```
 
 ## Tales for the Brave
 
