@@ -1,5 +1,5 @@
 ---
-title: ' Compromised Ubuntu VMAnalysis'
+title: 'Compromised Ubuntu VMAnalysis'
 description: 'Forensic analysis of a compromised Ubuntu virtual machine - investigating attack vectors, persistence mechanisms, and malicious activities'
 date: 2025-05-29
 tags: ['forensics', 'incident response', 'linux', 'ubuntu', 'malware analysis']
