@@ -46,7 +46,7 @@ After extracting all the queried domain names, I saw some unusual entries.
 
 ![alt text](<../../../assets/images/CSCV-2025/DNS/image copy 5.png>)
 
-```
+```text
 1760509440.192821000 10.10.5.80 p.c7aec5d0d81ba8748acac6931e5add6c24b635181443d0b9d2.hex.cloudflar3.com
 1760509440.212821000 10.10.0.53 p.c7aec5d0d81ba8748acac6931e5add6c24b635181443d0b9d2.hex.cloudflar3.com
 1760509440.426899000 10.10.5.80 p.f8aad90d5fc7774c1e7ee451e755831cd02bfaac3204aed8a4.hex.cloudflar3.com
@@ -64,11 +64,11 @@ After extracting all the queried domain names, I saw some unusual entries.
 I noticed the attacker exfiltrated data by encoding it as hexadecimal fragments embedded in DNS query names (qnames). Each qname contains a hex-encoded piece of AES-encrypted ciphertext.
 
 I found all the qnames ending with `.hex.cloudflar3.com`. Each has the structure:
-```
+```text
 <prefix>.<hexfragment>.hex.cloudflar3.com
 ```
 Example:
-```
+```text
 p.c7aec5d0d81ba8748acac6931e5add6c24b635181443d0b9d2.hex.cloudflar3.com
 ```
 - **prefix**: `p` (stream identifier)
@@ -213,7 +213,7 @@ if __name__ == '__main__':
 
 ![alt text](<../../../assets/images/CSCV-2025/DNS/image copy 6.png>)
 
-```
+```text
 CSCV2025{DnS_Exf1ltr4ti0nnnnnnnnnnNN!!}
 ``` 
 
@@ -816,7 +816,7 @@ I found two encoded strings that decode to:
 
 From the code, the flag format is:
 
-```
+```text
 CSCV2025{your_computer_<DESKTOP NAME>_has_be3n_kicked_by_<hensh1n_registryValue>}
 ```
 
@@ -828,7 +828,7 @@ Using the provided disk image, I located the desktop name in `System.evtx` and t
 
 That produced the flag:
 
-```
+```text
 CSCV2025{your_computer_DESKTOP-47ICHL6_has_be3n_kicked_byHxrYJgdu}
 ```
 

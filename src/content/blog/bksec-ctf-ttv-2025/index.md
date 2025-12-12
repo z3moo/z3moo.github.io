@@ -139,7 +139,9 @@ Upon unzipping the file we got access.log (fat af) and SQLLog.log
 
 The access.log has tons of entries and not all of them are one-liner. So we could use 
 
-`grep -c '^[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}' access.log` 
+```bash
+grep -c '^[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}' access.log
+``` 
 
 which will only count the line that has timestamp. 
 
@@ -153,7 +155,9 @@ which will only count the line that has timestamp.
 
 The timestamp is first collumm of the log so we could use something like
 
-`cut -d' ' -f1 access.log | sort | uniq -c | sort -nr | head -n 10`
+```bash
+cut -d' ' -f1 access.log | sort | uniq -c | sort -nr | head -n 10
+```
 
 which will only take the first field seperated by a ' ' then sorted it in ascending order. Then display the count of unique timestamp then sorted it in descending order.
 
@@ -201,7 +205,9 @@ We could try something like this to check how many request are sent in access.lo
 
 We indicated that sql_injection was the exploit. We could use that too see which is the endpoint. Using the same command as before
 
-`grep -E "SELECT|INSERT|UPDATE|DELETE|UNION|OR" access.log`
+```bash
+grep -E "SELECT|INSERT|UPDATE|DELETE|UNION|OR" access.log
+```
 
 We could see the many of the request was sent to `/GetBookName.aspx`
 
@@ -305,9 +311,11 @@ We got `fakeflag` and `len` so we must find `nemo`. Checking with the main funct
 
 So now we just need to XOR these two
 
-`nemo: 0, 0, 0, 0, 0, 0, 0x29, 0, 0x52, 0x2F, 0x38, 5, 0x5C, 0x31, 0x29, 0x5C, 0x1F, 0x3D, 0x19, 0x1E, 0x55, 0, 2, 8, 0xC, 0`
+```text
+nemo: 0, 0, 0, 0, 0, 0, 0x29, 0, 0x52, 0x2F, 0x38, 5, 0x5C, 0x31, 0x29, 0x5C, 0x1F, 0x3D, 0x19, 0x1E, 0x55, 0, 2, 8, 0xC, 0
 
-`fakeflag: BKSEC{gh3_gh3_v1p_pr0_zay}`
+fakeflag: BKSEC{gh3_gh3_v1p_pr0_zay}
+```
 
 ![image](https://hackmd.io/_uploads/HJzCJvZoJg.png)
 

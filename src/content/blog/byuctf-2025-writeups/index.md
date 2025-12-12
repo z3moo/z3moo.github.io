@@ -276,7 +276,7 @@ d-----         8/5/2022   3:05 PM                {699DC2F0-7B7E-431D-8D4E-84E5E3
 -a----         8/5/2022   3:05 PM          16384 ~DF0576503D8268117D.TMP                                               
 -a----         8/5/2022   3:05 PM          16384 ~DF64A0C29C2A02D94B.TMP                                               
 -a----         8/5/2022   3:05 PM          16384 ~DF9E950B5174EDB2B5.TMP 
-```
+```text
 
 The temp directory revealed several significant findings:
 - Installation packages for various enterprise applications (Elasticsearch, GlassFish, WAMP)
@@ -909,6 +909,8 @@ The following hosts are CONFIRMED cryptocurrency miners:
      → Total mining connections: 49,806
 ```
 
+```
+
 -> The flag is `byuctf{172.16.0.10_172.16.0.5}`
 ## Reverse Engineering
 ### u
@@ -966,6 +968,7 @@ The challenge gives me a Python script that's deliberately made hard to read. He
 └─$ python solve.py
 byuctf{u_are_good_with_math}
 ```
+
 Running the script reveals the flag: `byuctf{u_are_good_with_math}`
 
 ### LLIR
@@ -1045,6 +1048,7 @@ if s.check() == sat:
 └─$ python solve.py
 [+] Flag: byuctf{lL1r_not_str41ght_to_4sm_458d}
 ```
+
 Running the script revealed the flag: `byuctf{lL1r_not_str41ght_to_4sm_458d}`
 ### Baby Android 1
 #### Description
@@ -1167,6 +1171,7 @@ print(''.join(flag))
 └─$ python solve.py
 byuctf{c++_in_an_apk??}
 ```
+
 Running this script revealed the flag: `byuctf{c++_in_an_apk??}`
 
 ## Web Exploitation
