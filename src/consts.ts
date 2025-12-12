@@ -18,7 +18,7 @@ export const SITE: Site = {
     'A blog about my life, work, and the journey studying information security.',
   EMAIL: 'danhquan2005@gmail.com',
   NUM_POSTS_ON_HOMEPAGE: 3,
-  POSTS_PER_PAGE: 3,
+  POSTS_PER_PAGE: 5,
   SITEURL: 'https://z3moo.github.io',
 }
 
