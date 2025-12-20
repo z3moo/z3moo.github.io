@@ -1,6 +1,6 @@
 ---
-title: 'CSCV 2025: Forensics Challenge Writeup'
-description: 'Complete writeup for CSCV 2025 forensics challenges'
+title: 'CSCV 2025 Qualifiers: Forensics Challenge Writeup'
+description: 'Complete writeup for CSCV 2025 Qualifiers forensics challenges'
 date: 2025-10-22
 tags: ['forensics', 'ctf', 'disk forensics', 'network analysis', 'malware analysis', 'dns exfiltration', 'bitlocker', 'pcap', 'windows forensics']
 image: './banner.png'
