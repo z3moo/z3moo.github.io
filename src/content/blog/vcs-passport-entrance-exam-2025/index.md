@@ -1,6 +1,6 @@
 ---
-title: 'VCS Passport CTF Entrance Exam 2025'
-description: 'Writeups for forensics challenges from the VCS Passport CTF Entrance Exam 2025'
+title: 'VCS Passport CTF Blue Entrance Exam 2025'
+description: 'Writeups for challenges from the VCS Passport CTF Blue Entrance Exam 2025'
 date: 2025-12-20
 tags: ['ctf', 'forensics', 'cve', 'powershell', 'oracle weblogic', 'rce']
 image: './banner.png'
